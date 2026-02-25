@@ -3,17 +3,118 @@
   font-family: Arial, sans-serif;
 }
 
+/* Header styling */
+h1 {
+  font-size: 2em;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 20px 0 10px 0;
+  letter-spacing: 1px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.hint-button {
+  padding: 10px 16px;
+  font-size: 1.1em;
+  font-weight: 600;
+  background-color: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.hint-button:hover {
+  background-color: #5568d3;
+}
+
+.hint-button:active {
+  transform: scale(0.98);
+}
+
+h3 {
+  font-size: 1em;
+  font-weight: 500;
+  color: #555;
+  margin: 10px 0 20px 0;
+  /* font-style: italic; */
+  letter-spacing: 0.5px;
+  border: 4px solid #5fb0df;
+  border-radius: 8px;
+  padding: 12px 20px;
+  display: inline-block;
+}
+
+/* Word display area */
+.word-display-area {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.current-word {
+  font-size: 2em;
+  font-weight: bold;
+  color: #333;
+  letter-spacing: 1px;
+}
+
+/* Result message styling */
+.result-message {
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 1em;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.result-foundInPuzzle {
+  background-color: #c8e6c9;
+  color: #2e7d32;
+  /* border-left: 4px solid #2e7d32; */
+}
+
+.result-validNotInPuzzle {
+  background-color: #bbdefb;
+  color: #1565c0;
+  /* border-left: 4px solid #1565c0; */
+}
+
+.result-tooShort,
+.result-notAWord {
+  background-color: #ffccbc;
+  color: #d84315;
+  /* border-left: 4px solid #d84315; */
+}
+
+.result-alreadyFound {
+  background-color: #fff9c4;
+  color: #f57f17;
+  /* border-left: 4px solid #f57f17; */
+}
+
 .grid {
   position: relative;
   display: grid;
   grid-template-columns: repeat(6, 60px);
   gap: 8px;
   justify-content: center;
-  margin-top: 30px;
+  /* margin-top: 30px; */
+  margin-bottom: 20px;
 }
 
 .grid-overlay {
-  z-index: -1;
+  z-index: 0;
 }
 
 .cell {
@@ -29,9 +130,35 @@
   cursor: pointer;
   user-select: none;
   transition: background-color 0.2s ease;
+  position: relative;
+  z-index: 1;
 }
 
+/* current drag/hover highlight: light gray */
 .cell.selected {
+  background-color: #dbd8c5;
+  color: #333;
+}
+
+/* found word cells: light blue */
+.cell.found {
   background-color: #aedfee;
-  color: white;
+  color: #333;
+}
+
+/* spangram cells: light yellow */
+.cell.spangram {
+  background-color: #f8cd05;
+  color: #333;
+}
+
+/* connector line styles */
+.line-selected {
+  stroke: #bfbfbf; /* gray */
+}
+.line-found {
+  stroke: #5fb0df; /* light blue (darker variant) */
+}
+.line-spangram {
+  stroke: #ffec96; /* light yellow */
 }
