@@ -1,18 +1,20 @@
 export const puzzle = {
     grid: [
-        ["C","E","N","Y","R","O","D","L"],
-        ["L","Y","C","C","T","I","O","C"],
-        ["O","P","A","E","R","O","I","T"],
-        ["E","I","T","I","K","D","I","N"],
-        ["D","U","E","S","R","S","O","A"],
-        ["P","T","H","A","U","U","R","Y"]
+        ["R","T","E","L","P","S","R","V"],
+        ["E","A","L","I","M","A","O","E"],
+        ["D","S","E","T","O","C","E","R"],
+        ["N","A","L","D","U","R","C","P"],
+        ["T","I","B","E","L","A","E","R"],
+        ["E","R","R","O","F","T","B","O"]
     ],
     words: [
-        { word: "ENCYCLOPEDIA", type: "theme" },
-        { word: "DICTIONARY", type: "theme" },
-        { word: "DIRECTORY", type: "theme" },
-        { word: "THESAURUS", type: "theme" },
-        { word: "LOOKITUP", type: "spangram" }
+        { word: "LANDER", type: "theme" },
+        { word: "SATELLITE", type: "theme" },
+        { word: "ORBITER", type: "theme" },
+        { word: "MODULE", type: "theme" },
+        { word: "ROVER", type: "theme" },
+        { word: "PROBE", type: "theme" },
+        { word: "SPACECRAFT", type: "spangram" }
     ],
-    theme: "Just for reference"
+    theme: "That's really out there!"
 };

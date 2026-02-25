@@ -1,0 +1,896 @@
+[
+  {
+    "date": "2026-02-25",
+    "theme": "That's really out there!",
+    "spangram": "SPACECRAFT",
+    "theme_words": [
+      "SATELLITE",
+      "ORBITER",
+      "LANDER",
+      "MODULE",
+      "ROVER",
+      "PROBE"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-25-2026",
+    "day_of_week": "Wednesday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-02-24",
+    "theme": "Just for reference",
+    "spangram": "LOOKITUP",
+    "theme_words": [
+      "ENCYCLOPEDIA",
+      "DIRECTORY",
+      "THESAURUS",
+      "DICTIONARY"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-24-2026",
+    "day_of_week": "Tuesday",
+    "total_words": 5
+  },
+  {
+    "date": "2026-02-23",
+    "theme": "Strike a chord",
+    "spangram": "GUITAR",
+    "theme_words": [
+      "HEADSTOCK",
+      "NECK",
+      "PEGS",
+      "BODY",
+      "STRING",
+      "BRIDGE",
+      "FRETBOARD"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-23-2026",
+    "day_of_week": "Monday",
+    "total_words": 8
+  },
+  {
+    "date": "2026-02-22",
+    "theme": "Olympics wrap-up",
+    "spangram": "CLOSINGCEREMONY",
+    "theme_words": [
+      "FLAME",
+      "PARADE",
+      "FLAG",
+      "ATHLETE",
+      "MEDAL",
+      "ANTHEM"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-22-2026",
+    "day_of_week": "Sunday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-02-21",
+    "theme": "The beer necessities",
+    "spangram": "HOMEBREW",
+    "theme_words": [
+      "WATER",
+      "MALT",
+      "FLAVOR",
+      "HOPS",
+      "YEAST",
+      "WHEAT",
+      "SUGAR",
+      "BARLEY"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-21-2026",
+    "day_of_week": "Saturday",
+    "total_words": 9
+  },
+  {
+    "date": "2026-02-20",
+    "theme": "True grit",
+    "spangram": "SANDPAPER",
+    "theme_words": [
+      "PRICKLY",
+      "ROUGH",
+      "COARSE",
+      "SCRATCHY",
+      "ABRASIVE",
+      "HARSH"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-20-2026",
+    "day_of_week": "Friday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-02-19",
+    "theme": "Here's a thought",
+    "spangram": "EUREKA",
+    "theme_words": [
+      "IDEA",
+      "HYPOTHESIS",
+      "CONCEPT",
+      "POSTULATE",
+      "THEORY",
+      "NOTION"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-19-2026",
+    "day_of_week": "Thursday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-02-18",
+    "theme": "Cold competition",
+    "spangram": "WINTERSPORTS",
+    "theme_words": [
+      "LUGE",
+      "HOCKEY",
+      "CURLING",
+      "BOBSLED",
+      "SNOWBOARDING"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-18-2026",
+    "day_of_week": "Wednesday",
+    "total_words": 6
+  },
+  {
+    "date": "2026-02-17",
+    "theme": "The year of the ...",
+    "spangram": "ZODIACSIGNS",
+    "theme_words": [
+      "HORSE",
+      "SNAKE",
+      "GOAT",
+      "DRAGON",
+      "RABBIT",
+      "MONKEY",
+      "TIGER"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-17-2026",
+    "day_of_week": "Tuesday",
+    "total_words": 8
+  },
+  {
+    "date": "2026-02-16",
+    "theme": "The cutting edge",
+    "spangram": "FIGURESKATING",
+    "theme_words": [
+      "CROSSOVER",
+      "JUMP",
+      "SPIN",
+      "LIFT",
+      "THROW",
+      "LOOP",
+      "COMBO"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-16-2026",
+    "day_of_week": "Monday",
+    "total_words": 8
+  },
+  {
+    "date": "2026-02-15",
+    "theme": "'Now I get it!'",
+    "spangram": "SEETHELIGHT",
+    "theme_words": [
+      "GRASP",
+      "FATHOM",
+      "REALIZE",
+      "APPREHEND",
+      "UNDERSTAND"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-15-2026",
+    "day_of_week": "Sunday",
+    "total_words": 6
+  },
+  {
+    "date": "2026-02-14",
+    "theme": "XOXOXO",
+    "spangram": "HUGSANDKISSES",
+    "theme_words": [
+      "SNUGGLE",
+      "EMBRACE",
+      "CUDDLE",
+      "SMACK",
+      "PECK",
+      "SMOOCH"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-14-2026",
+    "day_of_week": "Saturday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-02-13",
+    "theme": "See what I mean?",
+    "spangram": "VISUALAIDS",
+    "theme_words": [
+      "DIAGRAM",
+      "PHOTO",
+      "INFOGRAPHIC",
+      "CHART",
+      "VIDEO",
+      "MODEL"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-13-2026",
+    "day_of_week": "Friday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-02-12",
+    "theme": "Sink or swim",
+    "spangram": "HIGHSTAKES",
+    "theme_words": [
+      "IMPERATIVE",
+      "RISKY",
+      "PIVOTAL",
+      "DECISIVE",
+      "CRITICAL"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-12-2026",
+    "day_of_week": "Thursday",
+    "total_words": 6
+  },
+  {
+    "date": "2026-02-11",
+    "theme": "Crack and snack",
+    "spangram": "GONUTS",
+    "theme_words": [
+      "PECAN",
+      "FILBERT",
+      "MACADAMIA",
+      "CASHEW",
+      "PISTACHIO",
+      "ALMOND"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-11-2026",
+    "day_of_week": "Wednesday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-02-10",
+    "theme": "It's on the house",
+    "spangram": "SIDINGMATERIAL",
+    "theme_words": [
+      "STUCCO",
+      "STONE",
+      "WOOD",
+      "COMPOSITE",
+      "BRICK",
+      "VINYL"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-10-2026",
+    "day_of_week": "Tuesday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-02-09",
+    "theme": "Frequent flyer",
+    "spangram": "AIRPORTS",
+    "theme_words": [
+      "RUNWAY",
+      "SECURITY",
+      "PASSPORT",
+      "TARMAC",
+      "LUGGAGE",
+      "PILOT"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-9-2026",
+    "day_of_week": "Monday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-02-08",
+    "theme": "Make it fancy",
+    "spangram": "COCKTAILGARNISH",
+    "theme_words": [
+      "TWIST",
+      "OLIVE",
+      "SPRIG",
+      "CELERY",
+      "SHRIMP",
+      "CHERRY"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-8-2026",
+    "day_of_week": "Sunday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-02-07",
+    "theme": "Boo-o-o-o-ring",
+    "spangram": "WATCHINGPAINTDRY",
+    "theme_words": [
+      "DREARY",
+      "DULL",
+      "MUNDANE",
+      "TIRESOME",
+      "HUMDRUM"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-7-2026",
+    "day_of_week": "Saturday",
+    "total_words": 6
+  },
+  {
+    "date": "2026-02-06",
+    "theme": "Let's face it",
+    "spangram": "FEATURES",
+    "theme_words": [
+      "BROWS",
+      "CHEEKS",
+      "EYES",
+      "MOUTH",
+      "HAIRLINE",
+      "FOREHEAD",
+      "NOSE"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-6-2026",
+    "day_of_week": "Friday",
+    "total_words": 8
+  },
+  {
+    "date": "2026-02-05",
+    "theme": "Quint-essential",
+    "spangram": "GIVEMEFIVE",
+    "theme_words": [
+      "WEEKDAYS",
+      "VOWELS",
+      "TOES",
+      "OCEANS",
+      "SENSES",
+      "BOROUGHS"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-5-2026",
+    "day_of_week": "Thursday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-02-04",
+    "theme": "For the enthusiast",
+    "spangram": "HOBBYSHOP",
+    "theme_words": [
+      "MINIATURE",
+      "PUZZLE",
+      "MODEL",
+      "COLLECTIBLE",
+      "GAME",
+      "DICE"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-4-2026",
+    "day_of_week": "Wednesday",
+    "total_words": 6
+  },
+  {
+    "date": "2026-02-03",
+    "theme": "On key",
+    "spangram": "SYMBOL",
+    "theme_words": [
+      "ASTERISK",
+      "TILDE",
+      "HASHTAG",
+      "BRACKET",
+      "UNDERSCORE",
+      "CARET"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-3-2026",
+    "day_of_week": "Tuesday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-02-02",
+    "theme": "Formidable flock",
+    "spangram": "BIGBIRDS",
+    "theme_words": [
+      "PENGUIN",
+      "OSTRICH",
+      "PELICAN",
+      "CASSOWARY",
+      "RHEA",
+      "CONDOR"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-2-2026",
+    "day_of_week": "Monday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-02-01",
+    "theme": "It's a gift",
+    "spangram": "GENEROSITY",
+    "theme_words": [
+      "BONUS",
+      "GRANT",
+      "PRESENT",
+      "DONATION",
+      "AWARD",
+      "OFFERING"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-february-1-2026",
+    "day_of_week": "Sunday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-01-31",
+    "theme": "It's part of the game",
+    "spangram": "HAVEABALL",
+    "theme_words": [
+      "BASE",
+      "FOOT",
+      "PICKLE",
+      "PADDLE",
+      "VOLLEY",
+      "RACQUET",
+      "BASKET"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-31-2026",
+    "day_of_week": "Saturday",
+    "total_words": 8
+  },
+  {
+    "date": "2026-01-30",
+    "theme": "We're not lost...",
+    "spangram": "FINDYOURWAY",
+    "theme_words": [
+      "BEACON",
+      "STAR",
+      "LANDMARK",
+      "SEXTANT",
+      "ATLAS",
+      "COMPASS"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-30-2026",
+    "day_of_week": "Friday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-01-29",
+    "theme": "Talk of the town",
+    "spangram": "CLAIMTOFAME",
+    "theme_words": [
+      "HERO",
+      "PERSONALITY",
+      "CELEBRITY",
+      "SUPERSTAR",
+      "ICON"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-29-2026",
+    "day_of_week": "Thursday",
+    "total_words": 6
+  },
+  {
+    "date": "2026-01-28",
+    "theme": "Zen state",
+    "spangram": "MINDFULNESS",
+    "theme_words": [
+      "FOCUS",
+      "MEDITATE",
+      "NOTICE",
+      "RELAX",
+      "LISTEN",
+      "BREATHE"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-28-2026",
+    "day_of_week": "Wednesday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-01-27",
+    "theme": "Canine classics",
+    "spangram": "HEREBOY",
+    "theme_words": [
+      "BLUE",
+      "CHAMP",
+      "ROVER",
+      "SCOUT",
+      "BANDIT",
+      "SCRUFFY",
+      "SPOT",
+      "BUDDY"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-27-2026",
+    "day_of_week": "Tuesday",
+    "total_words": 9
+  },
+  {
+    "date": "2026-01-26",
+    "theme": "Grape expectations",
+    "spangram": "BYTHEBOTTLE",
+    "theme_words": [
+      "ZINFANDEL",
+      "CHARDONNAY",
+      "SHIRAZ",
+      "MERLOT",
+      "MALBEC"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-26-2026",
+    "day_of_week": "Monday",
+    "total_words": 6
+  },
+  {
+    "date": "2026-01-25",
+    "theme": "The straight and narrow",
+    "spangram": "STICKYSITUATION",
+    "theme_words": [
+      "DOWEL",
+      "POLE",
+      "PICKET",
+      "STAKE",
+      "CANE",
+      "POST",
+      "BATON"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-25-2026",
+    "day_of_week": "Sunday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-01-24",
+    "theme": "A work of art",
+    "spangram": "FAMOUSPAINTING",
+    "theme_words": [
+      "NIGHT",
+      "STARRY",
+      "LILIES",
+      "PARTY",
+      "WATER",
+      "BOATING"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-24-2026",
+    "day_of_week": "Saturday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-01-23",
+    "theme": "None the wiser",
+    "spangram": "BORNYESTERDAY",
+    "theme_words": [
+      "CREDULOUS",
+      "ARTLESS",
+      "NAIVE",
+      "CALLOW",
+      "GULLIBLE"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-23-2026",
+    "day_of_week": "Friday",
+    "total_words": 6
+  },
+  {
+    "date": "2026-01-22",
+    "theme": "Ode to joy",
+    "spangram": "SEVENTHHEAVEN",
+    "theme_words": [
+      "BLISS",
+      "RHAPSODY",
+      "ECSTASY",
+      "ELATION",
+      "EUPHORIA"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-22-2026",
+    "day_of_week": "Thursday",
+    "total_words": 6
+  },
+  {
+    "date": "2026-01-21",
+    "theme": "That's not very polite",
+    "spangram": "DONTBERUDE",
+    "theme_words": [
+      "GLOAT",
+      "TEASE",
+      "BURP",
+      "SHOUT",
+      "STARE",
+      "POINT",
+      "INTERRUPT"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-21-2026",
+    "day_of_week": "Wednesday",
+    "total_words": 8
+  },
+  {
+    "date": "2026-01-20",
+    "theme": "Sneak-ing around",
+    "spangram": "JUSTFORKICKS",
+    "theme_words": [
+      "EYELET",
+      "SHOELACE",
+      "LOGO",
+      "VAMP",
+      "TONGUE",
+      "SOLE",
+      "HEEL"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-20-2026",
+    "day_of_week": "Tuesday",
+    "total_words": 8
+  },
+  {
+    "date": "2026-01-19",
+    "theme": "Shaking things up",
+    "spangram": "LETSROCK",
+    "theme_words": [
+      "WOBBLE",
+      "TREMBLE",
+      "WAVER",
+      "QUAKE",
+      "SWAY",
+      "TEETER",
+      "VIBRATE"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-19-2026",
+    "day_of_week": "Monday",
+    "total_words": 8
+  },
+  {
+    "date": "2026-01-18",
+    "theme": "Soft skills",
+    "spangram": "TEXTILEART",
+    "theme_words": [
+      "QUILT",
+      "CROCHET",
+      "APPLIQUE",
+      "KNIT",
+      "WEAVE",
+      "EMBROIDER"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-18-2026",
+    "day_of_week": "Sunday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-01-17",
+    "theme": "That's putting it midly!",
+    "spangram": "FOILEDAGAIN",
+    "theme_words": [
+      "TARNATION",
+      "PHOOEY",
+      "CURSES",
+      "FIDDLESTICKS",
+      "DRAT"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-17-2026",
+    "day_of_week": "Saturday",
+    "total_words": 6
+  },
+  {
+    "date": "2026-01-16",
+    "theme": "DC crusader",
+    "spangram": "BATMAN",
+    "theme_words": [
+      "ROBIN",
+      "JOKER",
+      "CAPE",
+      "VENGEANCE",
+      "PENGUIN",
+      "MANOR",
+      "JUSTICE"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-16-2026",
+    "day_of_week": "Friday",
+    "total_words": 8
+  },
+  {
+    "date": "2026-01-15",
+    "theme": "The ears have it!",
+    "spangram": "HEARHEAR",
+    "theme_words": [
+      "STIRRUP",
+      "CARTILAGE",
+      "LOBE",
+      "HAMMER",
+      "ANVIL",
+      "DRUM",
+      "CANAL"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-15-2026",
+    "day_of_week": "Thursday",
+    "total_words": 8
+  },
+  {
+    "date": "2026-01-14",
+    "theme": "'Oh boy!'",
+    "spangram": "LETSDOTHIS",
+    "theme_words": [
+      "EAGER",
+      "FERVENT",
+      "ZEALOUS",
+      "EXCITED",
+      "ENTHUSIASTIC"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-14-2026",
+    "day_of_week": "Wednesday",
+    "total_words": 6
+  },
+  {
+    "date": "2026-01-13",
+    "theme": "You need to chill",
+    "spangram": "FROZENFOOD",
+    "theme_words": [
+      "VEGETABLES",
+      "WAFFLES",
+      "PIZZA",
+      "POPSICLES",
+      "SHERBET"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-13-2026",
+    "day_of_week": "Tuesday",
+    "total_words": 6
+  },
+  {
+    "date": "2026-01-12",
+    "theme": "Appeal to a hire power",
+    "spangram": "RESUME",
+    "theme_words": [
+      "EDUCATION",
+      "AWARDS",
+      "SKILLS",
+      "NAME",
+      "CONTACT",
+      "EXPERIENCE"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-12-2026",
+    "day_of_week": "Monday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-01-11",
+    "theme": "Yay!!!",
+    "spangram": "THATSGREAT",
+    "theme_words": [
+      "HOORAY",
+      "HUZZAH",
+      "YIPPEE",
+      "WHOOPEE",
+      "BOOYAH",
+      "AWESOME"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-11-2026",
+    "day_of_week": "Sunday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-1-10",
+    "theme": "If not now, when?",
+    "spangram": "PROCRASTINATOR",
+    "theme_words": [
+      "LATER",
+      "EVENTUALLY",
+      "SOON",
+      "SHORTLY",
+      "TOMORROW"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-10-2026",
+    "day_of_week": "Saturday",
+    "total_words": 6
+  },
+  {
+    "date": "2026-01-09",
+    "theme": "For cubs fans",
+    "spangram": "BEARSINMIND",
+    "theme_words": [
+      "POLAR",
+      "GRIZZLY",
+      "PANDA",
+      "BLACK",
+      "BROWN",
+      "SPECTACLED"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-9-2026",
+    "day_of_week": "Friday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-01-08",
+    "theme": "That's just reality (TV)",
+    "spangram": "THETRAITORS",
+    "theme_words": [
+      "SHIELD",
+      "CASTLE",
+      "BANISHMENT",
+      "FAITHFUL",
+      "MISSION"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-8-2026",
+    "day_of_week": "Thursday",
+    "total_words": 6
+  },
+  {
+    "date": "2026-01-07",
+    "theme": "Open wide",
+    "spangram": "DENTISTSOFFICE",
+    "theme_words": [
+      "FLOSS",
+      "DRILL",
+      "MIRROR",
+      "FLUORIDE",
+      "TOOTHBRUSH"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-7-2026",
+    "day_of_week": "Wednesday",
+    "total_words": 6
+  },
+  {
+    "date": "2026-01-06",
+    "theme": "Look up!",
+    "spangram": "DEFYINGGRAVITY",
+    "theme_words": [
+      "BALLOON",
+      "DRONE",
+      "KITE",
+      "BIRD",
+      "AIRPLANE",
+      "ROCKET"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-6-2026",
+    "day_of_week": "Tuesday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-01-05",
+    "theme": "Slapped together",
+    "spangram": "QUICKANDDIRTY",
+    "theme_words": [
+      "BRISK",
+      "SWIFT",
+      "SPEEDY",
+      "GRUBBY",
+      "FILTHY",
+      "STAINED"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-5-2026",
+    "day_of_week": "Monday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-01-04",
+    "theme": "I just know...",
+    "spangram": "SIXTHSENSE",
+    "theme_words": [
+      "MEDIUM",
+      "ORACLE",
+      "CLAIRVOYANT",
+      "PSYCHIC",
+      "TELEPATH"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-4-2026",
+    "day_of_week": "Sunday",
+    "total_words": 6
+  },
+  {
+    "date": "2026-01-03",
+    "theme": "I've never seen that before!",
+    "spangram": "BREAKNEWGROUND",
+    "theme_words": [
+      "INVENTIVE",
+      "SEMINAL",
+      "ORIGINAL",
+      "NOVEL",
+      "FRESH"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-3-2026",
+    "day_of_week": "Saturday",
+    "total_words": 6
+  },
+  {
+    "date": "2026-01-02",
+    "theme": "Home is where the hearth is",
+    "spangram": "STAYWARM",
+    "theme_words": [
+      "BLANKET",
+      "SLIPPERS",
+      "COCOA",
+      "ROBE",
+      "FIREPLACE",
+      "CUDDLES"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-2-2026",
+    "day_of_week": "Friday",
+    "total_words": 7
+  },
+  {
+    "date": "2026-01-01",
+    "theme": "Not your average joe",
+    "spangram": "COFFEE",
+    "theme_words": [
+      "BOLD",
+      "NUTTY",
+      "BITTER",
+      "STRONG",
+      "AROMATIC",
+      "SMOOTH",
+      "VELVETY"
+    ],
+    "source": "https://mashable.com/article/strands-nyt-hint-january-1-2026",
+    "day_of_week": "Thursday",
+    "total_words": 8
+  }
+]
