@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import Grid from "./components/Grid";
-import { puzzle } from "./data/puzzle1";
+import { puzzle } from "./data/potential_grid";
 import "./App.css";
 
 function App() {

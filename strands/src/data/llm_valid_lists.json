@@ -1,0 +1,121 @@
+[
+  {
+    "theme": "In the driver's seat",
+    "spangram": "BACKSEATDRIVER",
+    "theme_words": [
+      "STEERING",
+      "ACCELERATOR",
+      "CLUTCH",
+      "GEARSHIFT"
+    ]
+  },
+  {
+    "theme": "You're soaking in it!",
+    "spangram": "BUBBLEBATH",
+    "theme_words": [
+      "SHAMPOO",
+      "LOOFAH",
+      "SPONGE",
+      "TOWEL",
+      "SCENTED",
+      "CANDLES"
+    ]
+  },
+  {
+    "theme": "Word to the wise",
+    "spangram": "PROVERBS",
+    "theme_words": [
+      "ADAGE",
+      "SAYING",
+      "MAXIM",
+      "APHORISM",
+      "IDIOM",
+      "CLICHE",
+      "MOTTO"
+    ]
+  },
+  {
+    "theme": "Signed, sealed...",
+    "spangram": "SNAILMAIL",
+    "theme_words": [
+      "STAMP",
+      "ENVELOPE",
+      "LETTER",
+      "MAILBOX",
+      "PACKAGE",
+      "PARCEL"
+    ]
+  },
+  {
+    "theme": "It's electric!",
+    "spangram": "POWERGRID",
+    "theme_words": [
+      "CIRCUIT",
+      "VOLTAGE",
+      "CURRENT",
+      "WIRE",
+      "CABLE",
+      "GENERATOR"
+    ]
+  },
+  {
+    "theme": "Ready for takeoff",
+    "spangram": "BOARDINGPASS",
+    "theme_words": [
+      "GATE",
+      "TERMINAL",
+      "AISLE",
+      "SEAT",
+      "OVERHEAD",
+      "CARRYON"
+    ]
+  },
+  {
+    "theme": "Under the weather",
+    "spangram": "COMMONCOLD",
+    "theme_words": [
+      "COUGH",
+      "SNEEZE",
+      "FEVER",
+      "CHILLS",
+      "ACHES",
+      "TISSUE",
+      "MUCUS"
+    ]
+  },
+  {
+    "theme": "All tied up",
+    "spangram": "KNOTSOFAST",
+    "theme_words": [
+      "BOWLINE",
+      "HALFHITCH",
+      "SHEETBEND",
+      "REEF",
+      "NOOSE",
+      "LOOP"
+    ]
+  },
+  {
+    "theme": "Lights, camera...",
+    "spangram": "ACTIONMOVIE",
+    "theme_words": [
+      "CHASE",
+      "EXPLOSION",
+      "VILLAIN",
+      "SIDEKICK",
+      "CARCRASH"
+    ]
+  },
+  {
+    "theme": "Sweet dreams",
+    "spangram": "BEDTIME",
+    "theme_words": [
+      "PILLOW",
+      "BLANKET",
+      "SHEETS",
+      "MATTRESS",
+      "LAMPSHADE",
+      "ALARM"
+    ]
+  }
+]
