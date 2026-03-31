@@ -1,22 +1,81 @@
+import random
+import time
+import os
+
 ROWS = 6
 COLS = 8
 
+DIRS_8 = [
+    (-1, 0), (1, 0), (0, -1), (0, 1),
+    (-1, -1), (-1, 1), (1, -1), (1, 1),
+]
+
+DIRS_4 = [
+    (-1, 0), (1, 0), (0, -1), (0, 1),
+]
+
+
+class SearchTimeout(Exception):
+    pass
+
+
+class SearchController:
+    def __init__(self, max_seconds=120, progress_every_seconds=5.0):
+        self.started_at = time.monotonic()
+        self.deadline = self.started_at + max_seconds
+        self.progress_every_seconds = progress_every_seconds
+        self.last_progress_at = self.started_at
+        self.max_seconds = max_seconds
+        self.stats = {
+            "spangram_attempts": 0,
+            "region_assignments": 0,
+            "region_path_dfs_nodes": 0,
+            "region_backtrack_states": 0,
+            "uniqueness_dfs_nodes": 0,
+        }
+
+    def check(self):
+        if time.monotonic() > self.deadline:
+            raise SearchTimeout()
+
+    def bump(self, key, n=1):
+        self.stats[key] = self.stats.get(key, 0) + n
+        now = time.monotonic()
+        if now - self.last_progress_at >= self.progress_every_seconds:
+            self.report()
+
+    def elapsed(self):
+        return time.monotonic() - self.started_at
+
+    def report(self, force=False, context="progress"):
+        now = time.monotonic()
+        if not force and (now - self.last_progress_at) < self.progress_every_seconds:
+            return
+        self.last_progress_at = now
+        print(
+            "[search] "
+            f"{context} elapsed={self.elapsed():.1f}s "
+            f"spangram_attempts={self.stats['spangram_attempts']} "
+            f"region_assignments={self.stats['region_assignments']} "
+            f"region_path_dfs_nodes={self.stats['region_path_dfs_nodes']} "
+            f"region_backtrack_states={self.stats['region_backtrack_states']} "
+            f"uniqueness_dfs_nodes={self.stats['uniqueness_dfs_nodes']}"
+        )
+
+
 def create_grid():
     return [[None for _ in range(COLS)] for _ in range(ROWS)]
+
+
+def copy_grid(grid):
+    return [row[:] for row in grid]
+
 
 def print_grid(grid):
     for row in grid:
         print(" ".join(cell if cell is not None else "." for cell in row))
     print()
 
-DIRS_8 = [
-    (-1, 0), (1, 0), (0, -1), (0, 1),
-    (-1, -1), (-1, 1), (1, -1), (1, 1)
-]
-
-DIRS_4 = [
-    (-1, 0), (1, 0), (0, -1), (0, 1)
-]
 
 def get_neighbors(r, c, dirs):
     for dr, dc in dirs:
@@ -24,95 +83,164 @@ def get_neighbors(r, c, dirs):
         if 0 <= nr < ROWS and 0 <= nc < COLS:
             yield nr, nc
 
-def get_forward_neighbors(r, c, orientation):
-    candidates = []
 
-    for nr, nc in get_neighbors(r, c, DIRS_8):
-        if orientation == "vertical":
-            # allow same row or moving DOWN, but not up
-            if nr >= r:
-                candidates.append((nr, nc))
-        else:
-            # allow same col or moving RIGHT, but not left
-            if nc >= c:
-                candidates.append((nr, nc))
+def place_word(grid, path, word):
+    for (r, c), ch in zip(path, word):
+        grid[r][c] = ch
 
-    return candidates
 
-from importlib.resources import path
-import random
+def clear_path(grid, path):
+    for r, c in path:
+        grid[r][c] = None
+
+
+def canonical_segment(a, b):
+    return tuple(sorted((a, b)))
+
+
+def path_segments(path):
+    return [canonical_segment(path[i], path[i + 1]) for i in range(len(path) - 1)]
+
+
+def segments_cross(seg1, seg2):
+    (a1, a2) = seg1
+    (b1, b2) = seg2
+
+    # Ignore touching segments; cell overlap is checked separately.
+    if a1 == b1 or a1 == b2 or a2 == b1 or a2 == b2:
+        return False
+
+    ax1, ay1 = a1
+    ax2, ay2 = a2
+    bx1, by1 = b1
+    bx2, by2 = b2
+
+    # In this grid, true visual crossing without shared endpoints happens
+    # only for opposite diagonals across the same 2x2 square.
+    da_x = ax2 - ax1
+    da_y = ay2 - ay1
+    db_x = bx2 - bx1
+    db_y = by2 - by1
+
+    return (
+        abs(da_x) == 1
+        and abs(da_y) == 1
+        and abs(db_x) == 1
+        and abs(db_y) == 1
+        and (ax1 + ax2) == (bx1 + bx2)
+        and (ay1 + ay2) == (by1 + by2)
+        and (da_x * db_x + da_y * db_y) == 0
+    )
+
+
+def paths_conflict(path_a, path_b):
+    if set(path_a) & set(path_b):
+        return True
+
+    seg_a = path_segments(path_a)
+    seg_b = path_segments(path_b)
+    for sa in seg_a:
+        for sb in seg_b:
+            if segments_cross(sa, sb):
+                return True
+    return False
+
+
+def path_compatible_with_existing(path, existing_paths):
+    for existing in existing_paths:
+        if paths_conflict(path, existing):
+            return False
+    return True
+
+
+def all_paths_compatible(paths):
+    for i in range(len(paths)):
+        for j in range(i + 1, len(paths)):
+            if paths_conflict(paths[i], paths[j]):
+                return False
+    return True
+
 
 def generate_spangram_path(spangram, max_attempts=500):
     for _ in range(max_attempts):
-        
-        # randomly choose orientation goal
-        orientation = random.choice(["vertical", "horizontal"])
-        
-        # choose a starting point on a relevant edge
-        if orientation == "vertical":
-            start = (0, random.randint(0, COLS - 1))  # top row
+        orientation = random.choice(["horizontal", "vertical"])
+
+        if orientation == "horizontal":
+            start_row = random.randint(0, ROWS - 1)
+            start = (start_row, 0)
         else:
-            start = (random.randint(0, ROWS - 1), 0)  # left column
-        
+            start_col = random.randint(0, COLS - 1)
+            start = (0, start_col)
+
         path = [start]
         visited = {start}
 
         while len(path) < len(spangram):
             r, c = path[-1]
-            neighbors = get_forward_neighbors(r, c, orientation)
-            random.shuffle(neighbors)
+            candidates = []
 
-            moved = False
-            for nr, nc in neighbors:
-                if (nr, nc) not in visited:
-                    path.append((nr, nc))
-                    visited.add((nr, nc))
-                    moved = True
-                    break
+            if orientation == "horizontal":
+                if c + 1 < COLS and (r, c + 1) not in visited:
+                    candidates.append((r, c + 1))
+                for dr in (-1, 1):
+                    nr = r + dr
+                    if (
+                        0 <= nr < ROWS
+                        and abs(nr - start_row) <= 2
+                        and c + 1 < COLS
+                        and (nr, c + 1) not in visited
+                    ):
+                        candidates.append((nr, c + 1))
+                if not candidates:
+                    for dr in (-1, 0, 1):
+                        nr = r + dr
+                        if (
+                            0 <= nr < ROWS
+                            and abs(nr - start_row) <= 2
+                            and (nr, c) not in visited
+                        ):
+                            candidates.append((nr, c))
+            else:
+                if r + 1 < ROWS and (r + 1, c) not in visited:
+                    candidates.append((r + 1, c))
+                for dc in (-1, 1):
+                    nc = c + dc
+                    if (
+                        0 <= nc < COLS
+                        and abs(nc - start_col) <= 2
+                        and r + 1 < ROWS
+                        and (r + 1, nc) not in visited
+                    ):
+                        candidates.append((r + 1, nc))
+                if not candidates:
+                    for dc in (-1, 0, 1):
+                        nc = c + dc
+                        if (
+                            0 <= nc < COLS
+                            and abs(nc - start_col) <= 2
+                            and (r, nc) not in visited
+                        ):
+                            candidates.append((r, nc))
 
-            if not moved:
-                break  # dead end → restart
+            if not candidates:
+                break
 
-        if len(path) == len(spangram) and satisfies_span(path, orientation):
-            return path
+            next_pos = random.choice(candidates)
+            path.append(next_pos)
+            visited.add(next_pos)
+
+        if len(path) != len(spangram):
+            continue
+
+        if orientation == "horizontal" and not any(c == COLS - 1 for _, c in path):
+            continue
+        if orientation == "vertical" and not any(r == ROWS - 1 for r, _ in path):
+            continue
+
+        return path
 
     return None
 
-def satisfies_span(path, orientation):
-    if orientation == "vertical":
-        return any(r == 0 for r, _ in path) and any(r == ROWS - 1 for r, _ in path)
-    else:
-        return any(c == 0 for _, c in path) and any(c == COLS - 1 for _, c in path)
-
-def place_spangram(grid, spangram):
-    path = generate_spangram_path(spangram)
-
-    if path is None:
-        return False
-
-    for (r, c), ch in zip(path, spangram):
-        grid[r][c] = ch
-
-    return True
-
-def place_spangram(grid, spangram, theme_words):
-    for _ in range(1000):
-        path = generate_spangram_path(spangram)
-        if path is None:
-            continue
-
-        # place temporarily
-        for (r, c), ch in zip(path, spangram):
-            grid[r][c] = ch
-
-        if is_good_spangram(grid, theme_words):
-            return True  # keep it
-
-        # undo if bad
-        for r, c in path:
-            grid[r][c] = None
-
-    return False
 
 def get_regions(grid):
     visited = set()
@@ -120,153 +248,588 @@ def get_regions(grid):
 
     for r in range(ROWS):
         for c in range(COLS):
-            if grid[r][c] is None and (r, c) not in visited:
-                stack = [(r, c)]
-                region = []
+            if grid[r][c] is not None or (r, c) in visited:
+                continue
 
-                while stack:
-                    cr, cc = stack.pop()
-                    if (cr, cc) in visited:
-                        continue
-
-                    visited.add((cr, cc))
-                    region.append((cr, cc))
-
-                    for nr, nc in get_neighbors(cr, cc, DIRS_4):
-                        if grid[nr][nc] is None:
-                            stack.append((nr, nc))
-
-                regions.append(region)
+            stack = [(r, c)]
+            region = []
+            while stack:
+                cr, cc = stack.pop()
+                if (cr, cc) in visited:
+                    continue
+                visited.add((cr, cc))
+                region.append((cr, cc))
+                for nr, nc in get_neighbors(cr, cc, DIRS_4):
+                    if grid[nr][nc] is None and (nr, nc) not in visited:
+                        stack.append((nr, nc))
+            regions.append(region)
 
     return regions
 
-def is_good_spangram(grid, theme_words):
-    regions = get_regions(grid)
-    # print("Region sizes:", [len(r) for r in regions])
 
-    word_lengths = [len(w) for w in theme_words]
-    
-    if len(regions) > 3:
+def assign_words_to_regions(regions, words, controller=None):
+    region_sizes = [len(r) for r in regions]
+    words_sorted = sorted(words, key=len, reverse=True)
+    results = []
+
+    def subset(words_left, target, start=0, path=None):
+        if controller is not None:
+            controller.check()
+        if path is None:
+            path = []
+        if target == 0:
+            yield path[:]
+            return
+        for j in range(start, len(words_left)):
+            w = words_left[j]
+            if len(w) <= target:
+                yield from subset(words_left, target - len(w), j + 1, path + [w])
+
+    def backtrack(i, remaining_words, current_assignment):
+        if controller is not None:
+            controller.check()
+        if i == len(regions):
+            if not remaining_words:
+                results.append([group[:] for group in current_assignment])
+            return
+
+        size = region_sizes[i]
+        for group in subset(remaining_words, size):
+            new_remaining = remaining_words[:]
+            for w in group:
+                new_remaining.remove(w)
+            backtrack(i + 1, new_remaining, current_assignment + [group])
+
+    backtrack(0, words_sorted, [])
+    return results
+
+
+def enumerate_region_paths_by_length(region_cells, lengths, controller=None):
+    region_set = set(region_cells)
+    all_paths = {length: [] for length in lengths}
+
+    def dfs(path, visited, target_len):
+        if controller is not None:
+            controller.check()
+            controller.bump("region_path_dfs_nodes")
+        if len(path) == target_len:
+            all_paths[target_len].append(path[:])
+            return
+
+        r, c = path[-1]
+        for nr, nc in get_neighbors(r, c, DIRS_8):
+            if (nr, nc) in region_set and (nr, nc) not in visited:
+                visited.add((nr, nc))
+                path.append((nr, nc))
+                dfs(path, visited, target_len)
+                path.pop()
+                visited.remove((nr, nc))
+
+    for length in lengths:
+        for start in region_cells:
+            dfs([start], {start}, length)
+
+    return all_paths
+
+
+def solve_region_paths(region_cells, words, controller=None):
+    if not words:
+        return []
+
+    lengths = sorted({len(w) for w in words})
+    raw_paths_by_len = enumerate_region_paths_by_length(region_cells, lengths, controller=controller)
+    paths_by_len = {
+        length: [(path, frozenset(path)) for path in raw_paths_by_len[length]]
+        for length in lengths
+    }
+
+    for word in words:
+        if not paths_by_len[len(word)]:
+            return None
+
+    word_indices = tuple(range(len(words)))
+    assigned = {}
+    used_cells = set()
+    memo_dead_states = set()
+
+    def backtrack(remaining):
+        if controller is not None:
+            controller.check()
+            controller.bump("region_backtrack_states")
+        if not remaining:
+            return True
+
+        state_key = (remaining, frozenset(used_cells))
+        if state_key in memo_dead_states:
+            return False
+
+        best_idx = None
+        best_paths = None
+
+        for idx in remaining:
+            candidates = []
+            for path, path_set in paths_by_len[len(words[idx])]:
+                if path_set.isdisjoint(used_cells) and path_compatible_with_existing(path, assigned.values()):
+                    candidates.append((path, path_set))
+            if not candidates:
+                memo_dead_states.add(state_key)
+                return False
+            if best_paths is None or len(candidates) < len(best_paths):
+                best_idx = idx
+                best_paths = candidates
+
+        random.shuffle(best_paths)
+        next_remaining = tuple(idx for idx in remaining if idx != best_idx)
+
+        for path, path_set in best_paths:
+            assigned[best_idx] = path
+            used_cells.update(path_set)
+
+            if backtrack(next_remaining):
+                return True
+
+            del assigned[best_idx]
+            used_cells.difference_update(path_set)
+
+        memo_dead_states.add(state_key)
         return False
-    
-    for region in regions:
-        if not can_fill_region(len(region), word_lengths):
+
+    if not backtrack(word_indices):
+        return None
+
+    return [assigned[i] for i in range(len(words))]
+
+
+def has_exactly_one_path(grid, word, intended_path, controller=None):
+    count = 0
+    intended_found = False
+
+    def dfs(r, c, i, path, visited):
+        nonlocal count, intended_found
+
+        if controller is not None:
+            controller.check()
+            controller.bump("uniqueness_dfs_nodes")
+
+        if count > 1:
+            return
+
+        if i == len(word):
+            count += 1
+            if path == intended_path:
+                intended_found = True
+            return
+
+        for nr, nc in get_neighbors(r, c, DIRS_8):
+            if (nr, nc) in visited:
+                continue
+            if grid[nr][nc] != word[i]:
+                continue
+            visited.add((nr, nc))
+            path.append((nr, nc))
+            dfs(nr, nc, i + 1, path, visited)
+            path.pop()
+            visited.remove((nr, nc))
+
+    first_char = word[0]
+    for r in range(ROWS):
+        for c in range(COLS):
+            if grid[r][c] != first_char:
+                continue
+            dfs(r, c, 1, [(r, c)], {(r, c)})
+            if count > 1:
+                return False
+
+    return count == 1 and intended_found
+
+
+def count_word_paths_limited(grid, word, intended_path=None, limit=2):
+    count = 0
+    intended_found = False
+
+    def dfs(r, c, i, path, visited):
+        nonlocal count, intended_found
+        if count >= limit:
+            return
+        if i == len(word):
+            count += 1
+            if intended_path is not None and path == intended_path:
+                intended_found = True
+            return
+
+        for nr, nc in get_neighbors(r, c, DIRS_8):
+            if (nr, nc) in visited:
+                continue
+            if grid[nr][nc] != word[i]:
+                continue
+            visited.add((nr, nc))
+            path.append((nr, nc))
+            dfs(nr, nc, i + 1, path, visited)
+            path.pop()
+            visited.remove((nr, nc))
+
+    first_char = word[0]
+    for r in range(ROWS):
+        for c in range(COLS):
+            if grid[r][c] != first_char:
+                continue
+            dfs(r, c, 1, [(r, c)], {(r, c)})
+            if count >= limit:
+                return count, intended_found
+
+    return count, intended_found
+
+
+def is_globally_unique(grid, placed_words, controller=None):
+    seen_words = set()
+    for word, _ in placed_words:
+        if word in seen_words:
+            return False
+        seen_words.add(word)
+
+    all_paths = [path for _, path in placed_words]
+    if not all_paths_compatible(all_paths):
+        return False
+
+    for word, path in placed_words:
+        if not has_exactly_one_path(grid, word, path, controller=controller):
             return False
 
     return True
 
-def can_fill_region(region_size, word_lengths):
-    possible = {0}
 
-    for length in word_lengths:
-        new_possible = set(possible)
-        for s in possible:
-            if s + length <= region_size:
-                new_possible.add(s + length)
-        possible = new_possible
-
-    return region_size in possible
-
-def generate_word_paths(grid, start, word, allowed_cells):
+def sample_paths_in_region(region_cells, length, blocked_cells, max_paths=250):
+    region_set = set(region_cells)
+    blocked = set(blocked_cells)
     paths = []
 
-    def dfs(path, i):
-        if i == len(word):
+    starts = [cell for cell in region_cells if cell not in blocked]
+    random.shuffle(starts)
+
+    def dfs(path, visited):
+        if len(paths) >= max_paths:
+            return
+        if len(path) == length:
             paths.append(path[:])
             return
 
         r, c = path[-1]
-
-        for nr, nc in get_neighbors(r, c, DIRS_8):
-            if (nr, nc) not in allowed_cells:
+        neighbors = list(get_neighbors(r, c, DIRS_8))
+        random.shuffle(neighbors)
+        for nr, nc in neighbors:
+            if len(paths) >= max_paths:
+                return
+            if (nr, nc) in blocked or (nr, nc) in visited or (nr, nc) not in region_set:
                 continue
+            visited.add((nr, nc))
+            path.append((nr, nc))
+            dfs(path, visited)
+            path.pop()
+            visited.remove((nr, nc))
 
-            if (nr, nc) not in path and (grid[nr][nc] is None or grid[nr][nc] == word[i]):
-                path.append((nr, nc))
-                dfs(path, i + 1)
-                path.pop()
+    for start in starts:
+        if len(paths) >= max_paths:
+            break
+        dfs([start], {start})
 
-    dfs([start], 1)
     return paths
 
-def place_word(grid, path, word):
-    for (r, c), ch in zip(path, word):
-        grid[r][c] = ch
 
-def remove_word(grid, path, original_grid):
-    for r, c in path:
-        grid[r][c] = original_grid[r][c]
+def get_ambiguity_count(grid, placed_words):
+    bad = 0
+    for entry in placed_words:
+        count, intended_found = count_word_paths_limited(
+            grid,
+            entry["word"],
+            intended_path=entry["path"],
+            limit=2,
+        )
+        if count != 1 or not intended_found:
+            bad += 1
+    return bad
 
-def place_words(grid, words, regions, index=0):
-    if index == len(words):
-        return all(cell is not None for row in grid for cell in row)
 
-    word = words[index]
+def repair_ambiguities(grid, placed_words, regions, max_iterations=200):
+    for _ in range(max_iterations):
+        score = get_ambiguity_count(grid, placed_words)
+        if score == 0:
+            return True
 
-    for region in regions:
-        # quick prune: skip regions that are too small
-        if len(region) < len(word):
+        random.shuffle(placed_words)
+        improved = False
+
+        for idx, entry in enumerate(placed_words):
+            # Keep spangram fixed in fast mode to avoid expensive global reshaping.
+            if entry.get("type") == "spangram":
+                continue
+
+            count, intended_found = count_word_paths_limited(
+                grid,
+                entry["word"],
+                intended_path=entry["path"],
+                limit=2,
+            )
+            if count == 1 and intended_found:
+                continue
+
+            occupied = set()
+            other_paths = []
+            for j, other in enumerate(placed_words):
+                if j == idx:
+                    continue
+                occupied.update(other["path"])
+                other_paths.append(other["path"])
+
+            clear_path(grid, entry["path"])
+            candidates = sample_paths_in_region(
+                regions[entry["region_idx"]],
+                len(entry["word"]),
+                blocked_cells=occupied,
+                max_paths=300,
+            )
+            random.shuffle(candidates)
+
+            best_path = None
+            best_score = score
+
+            for path in candidates[:80]:
+                if not path_compatible_with_existing(path, other_paths):
+                    continue
+                place_word(grid, path, entry["word"])
+                old_path = entry["path"]
+                entry["path"] = path
+                new_score = get_ambiguity_count(grid, placed_words)
+                entry["path"] = old_path
+                clear_path(grid, path)
+
+                if new_score < best_score:
+                    best_score = new_score
+                    best_path = path
+                    if new_score == 0:
+                        break
+
+            if best_path is not None:
+                entry["path"] = best_path
+                place_word(grid, best_path, entry["word"])
+                improved = True
+                break
+
+            place_word(grid, entry["path"], entry["word"])
+
+        if not improved:
+            return False
+
+    return get_ambiguity_count(grid, placed_words) == 0
+
+
+def can_assign_words_to_regions(grid, theme_words):
+    regions = get_regions(grid)
+    if len(regions) > len(theme_words):
+        return False
+    return len(assign_words_to_regions(regions, theme_words)) > 0
+
+
+def place_spangram(grid, spangram, theme_words=None, max_attempts=1000, controller=None):
+    for _ in range(max_attempts):
+        if controller is not None:
+            controller.check()
+        path = generate_spangram_path(spangram)
+        if path is None:
             continue
 
-        region_set = set(region)
+        place_word(grid, path, spangram)
+        if theme_words is None or can_assign_words_to_regions(grid, theme_words):
+            return path
+        clear_path(grid, path)
 
-        for (r, c) in region:
-            if grid[r][c] is not None:
-                continue                
+    return None
 
-            paths = generate_word_paths(grid, (r, c), word, region_set)
 
-            # 🔥 HUGE: limit search
-            random.shuffle(paths)
-            paths = paths[:40]
+def solve_theme_words_globally(base_grid, spangram, spangram_path, theme_words, controller=None):
+    regions = sorted(get_regions(base_grid), key=len, reverse=True)
+    assignments = assign_words_to_regions(regions, theme_words, controller=controller)
+    random.shuffle(assignments)
 
-            for path in paths:
-                snapshot = [row[:] for row in grid]
+    if not assignments:
+        return None, None
 
+    for assignment in assignments:
+        if controller is not None:
+            controller.check()
+            controller.bump("region_assignments")
+        grid = copy_grid(base_grid)
+        placed_words = [(spangram, spangram_path)]
+        placement_ok = True
+
+        for region, words_in_region in zip(regions, assignment):
+            region_paths = solve_region_paths(region, words_in_region, controller=controller)
+            if region_paths is None:
+                placement_ok = False
+                break
+
+            for word, path in zip(words_in_region, region_paths):
                 place_word(grid, path, word)
+                placed_words.append((word, path))
 
-                # 🔥 FIX 2: enforce UNIQUE path for this word
-                all_paths = generate_word_paths(grid, path[0], word, region_set)[:2]
+        if placement_ok and is_globally_unique(grid, placed_words, controller=controller):
+            return grid, assignment
 
-                if len(all_paths) == 0:
-                    # ❌ not unique → undo and skip
-                    for rr in range(ROWS):
-                        for cc in range(COLS):
-                            grid[rr][cc] = snapshot[rr][cc]
-                    continue
+    return None, None
 
-                # proceed normally
-                if place_words(grid, words, regions, index + 1):
-                    return True
 
-                # backtrack
-                for rr in range(ROWS):
-                    for cc in range(COLS):
-                        grid[rr][cc] = snapshot[rr][cc]
+def solve_theme_words_fast(base_grid, spangram, spangram_path, theme_words, controller=None):
+    regions = sorted(get_regions(base_grid), key=len, reverse=True)
+    assignments = assign_words_to_regions(regions, theme_words, controller=controller)
+    random.shuffle(assignments)
 
-    return False
+    if not assignments:
+        return None, None
+
+    # Only sample a subset of assignments for speed.
+    assignments = assignments[: min(len(assignments), 40)]
+
+    for assignment in assignments:
+        if controller is not None:
+            controller.check()
+            controller.bump("region_assignments")
+
+        grid = copy_grid(base_grid)
+        placed_words = [{
+            "word": spangram,
+            "path": spangram_path,
+            "type": "spangram",
+            "region_idx": -1,
+        }]
+
+        placement_ok = True
+        for region_idx, (region, words_in_region) in enumerate(zip(regions, assignment)):
+            region_paths = solve_region_paths(region, words_in_region, controller=controller)
+            if region_paths is None:
+                placement_ok = False
+                break
+
+            for word, path in zip(words_in_region, region_paths):
+                if not path_compatible_with_existing(path, [e["path"] for e in placed_words]):
+                    placement_ok = False
+                    break
+                place_word(grid, path, word)
+                placed_words.append({
+                    "word": word,
+                    "path": path,
+                    "type": "theme",
+                    "region_idx": region_idx,
+                })
+
+            if not placement_ok:
+                break
+
+        if not placement_ok:
+            continue
+
+        if repair_ambiguities(grid, placed_words, regions, max_iterations=250):
+            return grid, assignment
+
+    return None, None
+
+
+def build_unique_puzzle(spangram, theme_words, spangram_attempts=300, controller=None):
+    for _ in range(spangram_attempts):
+        if controller is not None:
+            controller.check()
+            controller.bump("spangram_attempts")
+        grid = create_grid()
+        spangram_path = place_spangram(
+            grid,
+            spangram,
+            theme_words=theme_words,
+            max_attempts=1,
+            controller=controller,
+        )
+        if spangram_path is None:
+            continue
+
+        solved_grid, assignment = solve_theme_words_globally(
+            grid,
+            spangram,
+            spangram_path,
+            theme_words,
+            controller=controller,
+        )
+        if solved_grid is not None:
+            return solved_grid, assignment
+
+    return None, None
+
+
+def build_fast_puzzle(spangram, theme_words, spangram_attempts=120, controller=None):
+    for _ in range(spangram_attempts):
+        if controller is not None:
+            controller.check()
+            controller.bump("spangram_attempts")
+        grid = create_grid()
+        spangram_path = place_spangram(
+            grid,
+            spangram,
+            theme_words=theme_words,
+            max_attempts=1,
+            controller=controller,
+        )
+        if spangram_path is None:
+            continue
+
+        solved_grid, assignment = solve_theme_words_fast(
+            grid,
+            spangram,
+            spangram_path,
+            theme_words,
+            controller=controller,
+        )
+        if solved_grid is not None:
+            return solved_grid, assignment
+
+    return None, None
+
 
 if __name__ == "__main__":
-    grid = create_grid()
-    
-    spangram = "BACKSEATDRIVER"
+    spangram = "BUBBLEBATH"
+    theme_words = ["SHAMPOO", "SPONGE", "LOOFAH", "TOWEL", "SCENTED", "CANDLES"]
 
-    theme_words = ["STEERING",
-      "ACCELERATOR",
-      "CLUTCH",
-      "GEARSHIFT"]
+    max_seconds = int(os.getenv("STRANDS_MAX_SECONDS", "1200"))
+    spangram_attempts = int(os.getenv("STRANDS_SPANGRAM_ATTEMPTS", "250"))
+    progress_every = float(os.getenv("STRANDS_PROGRESS_EVERY", "10"))
+    mode = os.getenv("STRANDS_MODE", "fast").strip().lower()
 
-    theme_words = sorted(theme_words, key=len, reverse=True)
-    
-    if not place_spangram(grid, spangram, theme_words):
-        print("Failed to place spangram")
-    else:
-        regions = get_regions(grid)
-        success = place_words(grid, theme_words, regions)
+    controller = SearchController(
+        max_seconds=max_seconds,
+        progress_every_seconds=progress_every,
+    )
 
-        if success:
-            print("Words placed")
+    try:
+        if mode == "strict":
+            grid, assignment = build_unique_puzzle(
+                spangram,
+                theme_words,
+                spangram_attempts=spangram_attempts,
+                controller=controller,
+            )
         else:
-            print("Failed to place theme words")
+            grid, assignment = build_fast_puzzle(
+                spangram,
+                theme_words,
+                spangram_attempts=min(spangram_attempts, 160),
+                controller=controller,
+            )
+    except SearchTimeout:
+        grid, assignment = None, None
+        print(f"Stopped after reaching time budget of {max_seconds}s")
+        controller.report(force=True, context="timeout")
 
-        print_grid(grid)  # always show grid
+    if grid is None:
+        print("Failed to generate a globally unique puzzle with non-overlapping paths")
+    else:
+        print("Successfully generated globally unique puzzle")
+        print(f"Word-to-region assignment: {[len(words) for words in assignment]} words per region")
+        print("\nFinal puzzle:")
+        print_grid(grid)
+
+    controller.report(force=True, context="final")

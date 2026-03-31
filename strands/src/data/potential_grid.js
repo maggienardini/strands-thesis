@@ -1,39 +1,29 @@
-// export const puzzle = {
-//     grid: [
-//         ["R","T","E","L","P","S","R","V"],
-//         ["E","A","L","I","M","A","O","E"],
-//         ["D","S","E","T","O","C","E","R"],
-//         ["N","A","L","D","U","R","C","P"],
-//         ["T","I","B","E","L","A","E","R"],
-//         ["E","R","R","O","F","T","B","O"]
-//     ],
-//     words: [
-//         { word: "LANDER", type: "theme" },
-//         { word: "SATELLITE", type: "theme" },
-//         { word: "ORBITER", type: "theme" },
-//         { word: "MODULE", type: "theme" },
-//         { word: "ROVER", type: "theme" },
-//         { word: "PROBE", type: "theme" },
-//         { word: "SPACECRAFT", type: "spangram" }
-//     ],
-//     theme: "That's really out there!"
-// };
-
 export const puzzle = {
     grid: [
-        ["A", "C", "G", "R", "A", "A", "B", "S"],
-        ["C", "E", "S", "E", "K", "C", "E", "T"],
-        ["L", "H", "E", "S", "N", "G", "E", "C"],
-        ["E", "F", "I", "A", "I", "R", "C", "L"],
-        ["T", "R", "T", "T", "D", "H", "T", "U"],
-        ["R", "O", "A", "R", "I", "V", "E", "R"]
+        // zero overlap grid!!!!
+        ["H", "S", "P", "B", "O", "O", "F", "A"],
+        ["A", "M", "O", "U", "T", "L", "L", "H"],
+        ["E", "G", "O", "S", "B", "O", "W", "E"],
+        ["N", "O", "C", "E", "B", "A", "C", "S"],
+        ["P", "E", "N", "T", "D", "L", "N", "E"],
+        ["S", "H", "T", "A", "B", "E", "D", "L"]
     ],
     words: [
-        { word: "STEERING", type: "theme" },
-        { word: "ACCELERATOR", type: "theme" },
-        { word: "CLUTCH", type: "theme" },
-        { word: "GEARSHIFT", type: "theme" },
-        { word: "BACKSEATDRIVER", type: "spangram" }
+        { word: "SHAMPOO", type: "theme" },
+        { word: "SPONGE", type: "theme" },
+        { word: "LOOFAH", type: "theme" },
+        { word: "TOWEL", type: "theme" },
+        { word: "SCENTED", type: "theme" },
+        { word: "CANDLES", type: "theme" },
+        { word: "BUBBLEBATH", type: "spangram" }
     ],
-    theme: "In the driver's seat"
+    theme: "You're soaking in it!"
 };
+
+// almost perfect grid!!! only one word that crosses over itself
+// L E H A E N T D
+// W T O O F C E H
+// B O L B S E B T
+// S U B G L O P A
+// H O P E N L S A
+// O A M S E D N C
