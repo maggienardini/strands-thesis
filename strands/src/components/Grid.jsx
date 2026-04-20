@@ -1,10 +1,10 @@
 import { forwardRef, useEffect, useRef, useState } from "react";
 import Cell from "./Cell";
 
-const Grid = forwardRef(({ grid, selectedCells, foundPositions, foundPaths = [], onMouseDown, onMouseMove }, ref) => {
+const Grid = forwardRef(({ grid, selectedCells, foundPositions, foundPaths = [], hintPath = null, activeHint = null, onMouseDown, onMouseMove }, ref) => {
   // grid is rows-first: grid[rowIndex][colIndex]
-  const rows = grid ? grid.length : 8; // expected 8
   const cols = grid && grid[0] ? grid[0].length : 6; // expected 6
+  const isSelectingWord = selectedCells.length > 0;
 
   const [points, setPoints] = useState("");
   const [foundPolylines, setFoundPolylines] = useState([]);
@@ -43,7 +43,7 @@ const Grid = forwardRef(({ grid, selectedCells, foundPositions, foundPaths = [],
       className="grid"
       ref={ref}
       onMouseMove={onMouseMove}
-      style={{ gridTemplateColumns: `repeat(${cols}, 60px)` }}
+      style={{ gridTemplateColumns: `repeat(${cols}, 54px)` }}
     >
       {/* SVG overlay for connectors */}
       <svg
@@ -69,25 +69,37 @@ const Grid = forwardRef(({ grid, selectedCells, foundPositions, foundPaths = [],
       </svg>
 
       {grid?.map((row, rowIndex) =>
-        row.map((letter, colIndex) => (
-          <Cell
-            key={`${rowIndex}-${colIndex}`}
-            letter={letter}
-            row={rowIndex}
-            col={colIndex}
-            selected={selectedCells.some(cell => cell.row === rowIndex && cell.col === colIndex)}
-            type={
-              // determine if this cell is part of any found path and pass its type
-              (() => {
-                for (const fp of foundPaths) {
-                  if ((fp.path || []).some(p => p.row === rowIndex && p.col === colIndex)) return fp.type;
-                }
-                return foundPositions && foundPositions.has(`${rowIndex}-${colIndex}`) ? 'found' : null;
-              })()
-            }
-            onMouseDown={onMouseDown}
-          />
-        ))
+        row.map((letter, colIndex) => {
+          // Find hint index if this cell is part of hintPath
+          let hintIndex = -1;
+          if (hintPath) {
+            hintIndex = hintPath.findIndex(p => p.row === rowIndex && p.col === colIndex);
+          }
+
+          return (
+            <Cell
+              key={`${rowIndex}-${colIndex}`}
+              letter={letter}
+              row={rowIndex}
+              col={colIndex}
+              selected={selectedCells.some(cell => cell.row === rowIndex && cell.col === colIndex)}
+              type={
+                // Determine cell type: hint > found > base
+                (() => {
+                  if (hintIndex !== -1) return 'hint';
+                  for (const fp of foundPaths) {
+                    if ((fp.path || []).some(p => p.row === rowIndex && p.col === colIndex)) return fp.type;
+                  }
+                  return foundPositions && foundPositions.has(`${rowIndex}-${colIndex}`) ? 'found' : null;
+                })()
+              }
+              hintIndex={hintIndex >= 0 ? hintIndex : null}
+              hintStage={isSelectingWord ? 'highlight' : activeHint?.stage}
+              hintLength={hintPath?.length}
+              onMouseDown={onMouseDown}
+            />
+          );
+        })
       )}
     </div>
   );

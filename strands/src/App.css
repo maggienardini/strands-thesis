@@ -40,6 +40,12 @@ h1 {
   transform: scale(0.98);
 }
 
+.hint-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 h3 {
   font-size: 1em;
   font-weight: 500;
@@ -60,6 +66,32 @@ h3 {
   align-items: center;
   justify-content: center;
   margin: 10px 0;
+  flex-direction: column;
+}
+
+.hint-status {
+  font-size: 0.95em;
+  color: #6c3483;
+  padding: 8px 12px;
+  background-color: #ede7f6;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.hint-status.bounce {
+  background-color: #d1c4e9;
+  color: #512da8;
+  font-weight: 600;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 .current-word {
@@ -106,8 +138,8 @@ h3 {
 .grid {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(6, 60px);
-  gap: 8px;
+  grid-template-columns: repeat(6, 54px);
+  gap: 12px;
   justify-content: center;
   /* margin-top: 30px; */
   margin-bottom: 20px;
@@ -118,14 +150,14 @@ h3 {
 }
 
 .cell {
-  width: 60px;
-  height: 60px;
+  width: 54px;
+  height: 54px;
   background-color: #f2f2f2;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: bold;
   cursor: pointer;
   user-select: none;
@@ -150,6 +182,73 @@ h3 {
 .cell.spangram {
   background-color: #f8cd05;
   color: #333;
+}
+
+/* hint cells: light purple */
+.cell.hint {
+  background-color: #e1bee7;
+  color: #333;
+}
+
+/* Bounce animation for hint cells */
+@keyframes hint-bounce {
+  0% {
+    background-color: #e1bee7;
+    transform: scale(1);
+  }
+  1.5% {
+    background-color: #ce93d8;
+    transform: scale(0.85);
+  }
+  8% {
+    background-color: #ce93d8;
+    transform: scale(0.85);
+  }
+  9.5% {
+    background-color: #e1bee7;
+    transform: scale(1);
+  }
+  100% {
+    background-color: #e1bee7;
+    transform: scale(1);
+  }
+}
+
+.cell.hint-bounce {
+  transition: none;
+  animation: hint-bounce 6.5s linear infinite;
+}
+
+/* Stagger animation based on hint index */
+.cell.hint-bounce[data-hint-index="0"] {
+  animation-delay: 0s;
+}
+.cell.hint-bounce[data-hint-index="1"] {
+  animation-delay: 0.4s;
+}
+.cell.hint-bounce[data-hint-index="2"] {
+  animation-delay: 0.8s;
+}
+.cell.hint-bounce[data-hint-index="3"] {
+  animation-delay: 1.2s;
+}
+.cell.hint-bounce[data-hint-index="4"] {
+  animation-delay: 1.6s;
+}
+.cell.hint-bounce[data-hint-index="5"] {
+  animation-delay: 2s;
+}
+.cell.hint-bounce[data-hint-index="6"] {
+  animation-delay: 2.4s;
+}
+.cell.hint-bounce[data-hint-index="7"] {
+  animation-delay: 2.8s;
+}
+.cell.hint-bounce[data-hint-index="8"] {
+  animation-delay: 3.2s;
+}
+.cell.hint-bounce[data-hint-index="9"] {
+  animation-delay: 3.6s;
 }
 
 /* connector line styles */
