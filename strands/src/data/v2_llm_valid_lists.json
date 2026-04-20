@@ -1,0 +1,118 @@
+[
+  {
+    "theme": "Current events",
+    "spangram": "ELECTRICITY",
+    "theme_words": [
+      "VOLTAGE",
+      "CIRCUIT",
+      "WATTAGE",
+      "BATTERY",
+      "GENERATOR"
+    ]
+  },
+  {
+    "theme": "Wait for it...",
+    "spangram": "PROCRASTINATE",
+    "theme_words": [
+      "DELAY",
+      "DITHER",
+      "STALL",
+      "PAUSE",
+      "LOITER",
+      "HESITATE"
+    ]
+  },
+  {
+    "theme": "Under the hood",
+    "spangram": "AUTOMOBILE",
+    "theme_words": [
+      "ENGINE",
+      "PISTON",
+      "CLUTCH",
+      "CHASSIS",
+      "GASKET",
+      "EXHAUST"
+    ]
+  },
+  {
+    "theme": "A bit of a stretch",
+    "spangram": "YOGAPOSES",
+    "theme_words": [
+      "COBRA",
+      "PLANK",
+      "WARRIOR",
+      "BRIDGE",
+      "MOUNTAIN",
+      "TRIANGLE"
+    ]
+  },
+  {
+    "theme": "Make a scene",
+    "spangram": "THEATRICAL",
+    "theme_words": [
+      "DIALOGUE",
+      "COSTUME",
+      "PROPS",
+      "SPOTLIGHT",
+      "REHEARSAL"
+    ]
+  },
+  {
+    "theme": "High-altitude",
+    "spangram": "MOUNTAINEER",
+    "theme_words": [
+      "SUMMIT",
+      "CREVASSE",
+      "GLACIER",
+      "SHELTER",
+      "CARABINER"
+    ]
+  },
+  {
+    "theme": "I'm staying put",
+    "spangram": "FURNITURE",
+    "theme_words": [
+      "OTTOMAN",
+      "RECLINER",
+      "ARMOIRE",
+      "SIDEBOARD",
+      "CREDENZA"
+    ]
+  },
+  {
+    "theme": "Heavy metal",
+    "spangram": "CONSTRUCTION",
+    "theme_words": [
+      "SCAFFOLD",
+      "GIRDER",
+      "CEMENT",
+      "DERRICK",
+      "BULLDOZER"
+    ]
+  },
+  {
+    "theme": "Wild card",
+    "spangram": "POKERHAND",
+    "theme_words": [
+      "FLUSH",
+      "FULLHOUSE",
+      "ROYAL",
+      "PAIR",
+      "QUADS",
+      "TRIPS",
+      "DEALER"
+    ]
+  },
+  {
+    "theme": "Night owls",
+    "spangram": "NOCTURNAL",
+    "theme_words": [
+      "BADGER",
+      "RACCOON",
+      "FIREFLY",
+      "CRICKET",
+      "OPOSSUM",
+      "LEMUR"
+    ]
+  }
+]

@@ -35,6 +35,7 @@ class SearchController:
         }
 
     def check(self):
+        self.report()
         if time.monotonic() > self.deadline:
             raise SearchTimeout()
 
@@ -153,6 +154,38 @@ def path_compatible_with_existing(path, existing_paths):
     return True
 
 
+def path_has_self_crossing(path):
+    if len(path) < 4:
+        return False
+
+    segments = path_segments(path)
+    for i in range(len(segments)):
+        for j in range(i + 2, len(segments)):
+            if segments_cross(segments[i], segments[j]):
+                return True
+    return False
+
+
+def can_extend_path_without_self_cross(path, next_cell):
+    if len(path) < 2:
+        return True
+
+    a = path[-1]
+    b = next_cell
+    dr = b[0] - a[0]
+    dc = b[1] - a[1]
+
+    # Only diagonal segments can visually cross in this grid model.
+    if abs(dr) != 1 or abs(dc) != 1:
+        return True
+
+    opposite = canonical_segment((a[0], b[1]), (b[0], a[1]))
+    for i in range(len(path) - 1):
+        if canonical_segment(path[i], path[i + 1]) == opposite:
+            return False
+    return True
+
+
 def all_paths_compatible(paths):
     for i in range(len(paths)):
         for j in range(i + 1, len(paths)):
@@ -161,8 +194,248 @@ def all_paths_compatible(paths):
     return True
 
 
-def generate_spangram_path(spangram, max_attempts=500):
+def _is_edge_cell(cell):
+    r, c = cell
+    return r == 0 or r == ROWS - 1 or c == 0 or c == COLS - 1
+
+
+def _edge_id(cell):
+    r, c = cell
+    edges = set()
+    if r == 0:
+        edges.add("top")
+    if r == ROWS - 1:
+        edges.add("bottom")
+    if c == 0:
+        edges.add("left")
+    if c == COLS - 1:
+        edges.add("right")
+    return edges
+
+
+def _path_spans_opposite_edges(path):
+    touched_edges = set()
+    for cell in path:
+        touched_edges.update(_edge_id(cell))
+    return (
+        ("left" in touched_edges and "right" in touched_edges)
+        or ("top" in touched_edges and "bottom" in touched_edges)
+    )
+
+
+def _path_turn_count(path):
+    turns = 0
+    for i in range(2, len(path)):
+        dr1 = path[i - 1][0] - path[i - 2][0]
+        dc1 = path[i - 1][1] - path[i - 2][1]
+        dr2 = path[i][0] - path[i - 1][0]
+        dc2 = path[i][1] - path[i - 1][1]
+        if (dr1, dc1) != (dr2, dc2):
+            turns += 1
+    return turns
+
+
+def _path_bbox_area(path):
+    rows = [r for r, _ in path]
+    cols = [c for _, c in path]
+    return (max(rows) - min(rows) + 1) * (max(cols) - min(cols) + 1)
+
+
+def _path_has_reversal(path):
+    for i in range(2, len(path)):
+        dr1 = path[i - 1][0] - path[i - 2][0]
+        dc1 = path[i - 1][1] - path[i - 2][1]
+        dr2 = path[i][0] - path[i - 1][0]
+        dc2 = path[i][1] - path[i - 1][1]
+        if (dr2, dc2) == (-dr1, -dc1):
+            return True
+    return False
+
+
+def _count_small_open_regions(used_cells, min_region_size=4):
+    all_cells = {(r, c) for r in range(ROWS) for c in range(COLS)}
+    open_cells = all_cells - set(used_cells)
+    seen = set()
+    small_regions = 0
+
+    for cell in open_cells:
+        if cell in seen:
+            continue
+        stack = [cell]
+        size = 0
+        while stack:
+            cur = stack.pop()
+            if cur in seen:
+                continue
+            seen.add(cur)
+            size += 1
+            r, c = cur
+            for nr, nc in get_neighbors(r, c, DIRS_4):
+                if (nr, nc) in open_cells and (nr, nc) not in seen:
+                    stack.append((nr, nc))
+        if size < min_region_size:
+            small_regions += 1
+
+    return small_regions
+
+
+def _ribbon_contact_score(path, candidate):
+    # Prefer "out-and-back" structure where later segments run close and parallel
+    # to earlier segments, but avoid immediate local clustering.
+    if len(path) < 4:
+        return 0.0
+
+    r, c = candidate
+    score = 0.0
+    # Skip the most recent cells to avoid rewarding tiny zigzags.
+    for pr, pc in path[:-3]:
+        manhattan = abs(pr - r) + abs(pc - c)
+        if manhattan == 1:
+            score += 0.35
+        elif manhattan == 2:
+            score += 0.12
+    return score
+
+
+def _long_path_quality_ok(path):
+    if not path or not _is_edge_cell(path[0]) or not _is_edge_cell(path[-1]):
+        return False
+
+    # A spangram must connect opposite sides (left-right or top-bottom).
+    if not _path_spans_opposite_edges(path):
+        return False
+
+    # Avoid tiny edge-hugging paths for longer spangrams.
+    if len(path) >= 11:
+        turns = _path_turn_count(path)
+        bbox_area = _path_bbox_area(path)
+        touched_edges = set()
+        for cell in path:
+            touched_edges.update(_edge_id(cell))
+        if turns < 4:
+            return False
+        if bbox_area < min(18, ROWS * COLS):
+            return False
+        if len(touched_edges) < 2:
+            return False
+        if not _path_has_reversal(path) and len(touched_edges) < 3:
+            return False
+        if _count_small_open_regions(path, min_region_size=4) > 0:
+            return False
+
+    return True
+
+
+def _generate_spangram_path_long(spangram, max_attempts=1200, controller=None):
+    target_len = len(spangram)
+    edge_cells = [
+        (r, c)
+        for r in range(ROWS)
+        for c in range(COLS)
+        if _is_edge_cell((r, c))
+    ]
+
     for _ in range(max_attempts):
+        if controller is not None:
+            controller.check()
+
+        start = random.choice(edge_cells)
+        visited = {start}
+        path = [start]
+
+        # Bounded DFS per attempt so long mode stays responsive.
+        nodes = 0
+        max_nodes = 10000
+        result = None
+
+        def dfs(last_dir=None):
+            nonlocal nodes, result
+            if result is not None:
+                return
+            if controller is not None:
+                controller.check()
+
+            nodes += 1
+            if nodes > max_nodes:
+                return
+
+            if len(path) == target_len:
+                if _long_path_quality_ok(path):
+                    result = path[:]
+                return
+
+            r, c = path[-1]
+            candidates = []
+            for nr, nc in get_neighbors(r, c, DIRS_8):
+                if (nr, nc) in visited:
+                    continue
+                if not can_extend_path_without_self_cross(path, (nr, nc)):
+                    continue
+
+                dr = nr - r
+                dc = nc - c
+                score = 0.0
+
+                # Favor turns/curves over long straight segments.
+                if last_dir is not None:
+                    if (dr, dc) != last_dir:
+                        score += 1.8
+                    else:
+                        score -= 0.6
+                    if (dr, dc) == (-last_dir[0], -last_dir[1]):
+                        score += 1.0
+
+                # Encourage broad coverage to reduce simple straight sweeps.
+                rows = [p[0] for p in path]
+                cols = [p[1] for p in path]
+                cur_area = (max(rows) - min(rows) + 1) * (max(cols) - min(cols) + 1)
+                new_rows = rows + [nr]
+                new_cols = cols + [nc]
+                new_area = (max(new_rows) - min(new_rows) + 1) * (max(new_cols) - min(new_cols) + 1)
+                if new_area > cur_area:
+                    score += 0.8
+
+                # Slightly prefer staying in 4-neighbor motion most of the time.
+                if abs(dr) + abs(dc) == 1:
+                    score += 0.2
+
+                # Favor compact "ribbon" shapes over chaotic global snaking.
+                score += _ribbon_contact_score(path, (nr, nc))
+
+                # Avoid creating tiny disconnected pockets while drawing path.
+                trial_used = visited | {(nr, nc)}
+                tiny_regions = _count_small_open_regions(trial_used, min_region_size=4)
+                score -= 2.4 * tiny_regions
+
+                # Keep randomness so we get diverse shapes.
+                score += random.random() * 0.5
+                candidates.append((score, (nr, nc), (dr, dc)))
+
+            if not candidates:
+                return
+
+            candidates.sort(key=lambda x: x[0], reverse=True)
+            # Limit branching; this keeps speed stable while still exploring alternatives.
+            for _, (nr, nc), new_dir in candidates[:6]:
+                visited.add((nr, nc))
+                path.append((nr, nc))
+                dfs(last_dir=new_dir)
+                if result is not None:
+                    return
+                path.pop()
+                visited.remove((nr, nc))
+
+        dfs()
+        if result is not None and not path_has_self_crossing(result):
+            return result
+
+    return None
+
+
+def _generate_spangram_path_classic(spangram, max_attempts=500, controller=None):
+    for _ in range(max_attempts):
+        if controller is not None:
+            controller.check()
         orientation = random.choice(["horizontal", "vertical"])
 
         if orientation == "horizontal":
@@ -176,6 +449,8 @@ def generate_spangram_path(spangram, max_attempts=500):
         visited = {start}
 
         while len(path) < len(spangram):
+            if controller is not None:
+                controller.check()
             r, c = path[-1]
             candidates = []
 
@@ -237,9 +512,44 @@ def generate_spangram_path(spangram, max_attempts=500):
         if orientation == "vertical" and not any(r == ROWS - 1 for r, _ in path):
             continue
 
+        # Defensive validation: classic mode should always be a true side-to-side span.
+        if not _path_spans_opposite_edges(path):
+            continue
+
+        if path_has_self_crossing(path):
+            continue
+
         return path
 
     return None
+
+
+def generate_spangram_path(
+    spangram,
+    max_attempts=500,
+    mode="auto",
+    long_threshold=11,
+    controller=None,
+):
+    mode = (mode or "auto").strip().lower()
+    use_long = mode == "long" or (mode == "auto" and len(spangram) >= long_threshold)
+
+    if use_long:
+        path = _generate_spangram_path_long(
+            spangram,
+            max_attempts=max_attempts,
+            controller=controller,
+        )
+        if path is not None:
+            return path
+        if mode == "long":
+            return None
+
+    return _generate_spangram_path_classic(
+        spangram,
+        max_attempts=max_attempts,
+        controller=controller,
+    )
 
 
 def get_regions(grid):
@@ -400,6 +710,71 @@ def solve_region_paths(region_cells, words, controller=None):
     return [assigned[i] for i in range(len(words))]
 
 
+def solve_region_paths_fast(
+    region_cells,
+    words,
+    max_trials=12,
+    per_step_candidates=40,
+    controller=None,
+):
+    if not words:
+        return []
+
+    # Place longer words first; they are usually the most constrained.
+    order = sorted(range(len(words)), key=lambda i: len(words[i]), reverse=True)
+
+    for _ in range(max_trials):
+        assigned = {}
+        used_cells = set()
+
+        def backtrack(pos):
+            if pos == len(order):
+                return True
+
+            idx = order[pos]
+            length = len(words[idx])
+
+            candidates = sample_paths_in_region(
+                region_cells,
+                length,
+                blocked_cells=used_cells,
+                max_paths=per_step_candidates * 2,
+                controller=controller,
+            )
+            if not candidates:
+                return False
+
+            random.shuffle(candidates)
+            existing_paths = list(assigned.values())
+
+            tried = 0
+            for path in candidates:
+                if tried >= per_step_candidates:
+                    break
+                path_set = set(path)
+                if not path_set.isdisjoint(used_cells):
+                    continue
+                if not path_compatible_with_existing(path, existing_paths):
+                    continue
+
+                tried += 1
+                assigned[idx] = path
+                used_cells.update(path_set)
+
+                if backtrack(pos + 1):
+                    return True
+
+                del assigned[idx]
+                used_cells.difference_update(path_set)
+
+            return False
+
+        if backtrack(0):
+            return [assigned[i] for i in range(len(words))]
+
+    return None
+
+
 def has_exactly_one_path(grid, word, intended_path, controller=None):
     count = 0
     intended_found = False
@@ -498,7 +873,7 @@ def is_globally_unique(grid, placed_words, controller=None):
     return True
 
 
-def sample_paths_in_region(region_cells, length, blocked_cells, max_paths=250):
+def sample_paths_in_region(region_cells, length, blocked_cells, max_paths=250, controller=None):
     region_set = set(region_cells)
     blocked = set(blocked_cells)
     paths = []
@@ -507,6 +882,8 @@ def sample_paths_in_region(region_cells, length, blocked_cells, max_paths=250):
     random.shuffle(starts)
 
     def dfs(path, visited):
+        if controller is not None:
+            controller.check()
         if len(paths) >= max_paths:
             return
         if len(path) == length:
@@ -532,7 +909,8 @@ def sample_paths_in_region(region_cells, length, blocked_cells, max_paths=250):
             break
         dfs([start], {start})
 
-    return paths
+    # Validate: reject any paths with self-crossing before returning.
+    return [p for p in paths if not path_has_self_crossing(p)]
 
 
 def get_ambiguity_count(grid, placed_words):
@@ -549,8 +927,10 @@ def get_ambiguity_count(grid, placed_words):
     return bad
 
 
-def repair_ambiguities(grid, placed_words, regions, max_iterations=200):
+def repair_ambiguities(grid, placed_words, regions, max_iterations=200, controller=None):
     for _ in range(max_iterations):
+        if controller is not None:
+            controller.check()
         score = get_ambiguity_count(grid, placed_words)
         if score == 0:
             return True
@@ -585,14 +965,15 @@ def repair_ambiguities(grid, placed_words, regions, max_iterations=200):
                 regions[entry["region_idx"]],
                 len(entry["word"]),
                 blocked_cells=occupied,
-                max_paths=300,
+                max_paths=60,
+                controller=controller,
             )
             random.shuffle(candidates)
 
             best_path = None
             best_score = score
 
-            for path in candidates[:80]:
+            for path in candidates[:20]:
                 if not path_compatible_with_existing(path, other_paths):
                     continue
                 place_word(grid, path, entry["word"])
@@ -626,14 +1007,34 @@ def can_assign_words_to_regions(grid, theme_words):
     regions = get_regions(grid)
     if len(regions) > len(theme_words):
         return False
+
+    # Fast pre-check: each region must be large enough to hold at least
+    # the shortest theme word, otherwise assignment is impossible.
+    min_word_len = min(len(w) for w in theme_words)
+    if any(len(region) < min_word_len for region in regions):
+        return False
+
     return len(assign_words_to_regions(regions, theme_words)) > 0
 
 
-def place_spangram(grid, spangram, theme_words=None, max_attempts=1000, controller=None):
+def place_spangram(
+    grid,
+    spangram,
+    theme_words=None,
+    max_attempts=1000,
+    controller=None,
+    spangram_mode="auto",
+    long_threshold=11,
+):
     for _ in range(max_attempts):
         if controller is not None:
             controller.check()
-        path = generate_spangram_path(spangram)
+        path = generate_spangram_path(
+            spangram,
+            mode=spangram_mode,
+            long_threshold=long_threshold,
+            controller=controller,
+        )
         if path is None:
             continue
 
@@ -685,13 +1086,14 @@ def solve_theme_words_fast(base_grid, spangram, spangram_path, theme_words, cont
     if not assignments:
         return None, None
 
-    # Only sample a subset of assignments for speed.
-    assignments = assignments[: min(len(assignments), 40)]
+    # Only sample a smaller subset of assignments for speed.
+    assignments = assignments[: min(len(assignments), 6)]
 
     for assignment in assignments:
         if controller is not None:
             controller.check()
             controller.bump("region_assignments")
+            controller.report()
 
         grid = copy_grid(base_grid)
         placed_words = [{
@@ -703,7 +1105,15 @@ def solve_theme_words_fast(base_grid, spangram, spangram_path, theme_words, cont
 
         placement_ok = True
         for region_idx, (region, words_in_region) in enumerate(zip(regions, assignment)):
-            region_paths = solve_region_paths(region, words_in_region, controller=controller)
+            # Use bounded stochastic search in fast mode so a single region does
+            # not monopolize the entire run.
+            region_paths = solve_region_paths_fast(
+                region,
+                words_in_region,
+                max_trials=10,
+                per_step_candidates=30,
+                controller=controller,
+            )
             if region_paths is None:
                 placement_ok = False
                 break
@@ -726,17 +1136,25 @@ def solve_theme_words_fast(base_grid, spangram, spangram_path, theme_words, cont
         if not placement_ok:
             continue
 
-        if repair_ambiguities(grid, placed_words, regions, max_iterations=250):
+        if repair_ambiguities(grid, placed_words, regions, max_iterations=20, controller=controller):
             return grid, assignment
 
     return None, None
 
 
-def build_unique_puzzle(spangram, theme_words, spangram_attempts=300, controller=None):
+def build_unique_puzzle(
+    spangram,
+    theme_words,
+    spangram_attempts=300,
+    controller=None,
+    spangram_mode="auto",
+    long_threshold=11,
+):
     for _ in range(spangram_attempts):
         if controller is not None:
             controller.check()
             controller.bump("spangram_attempts")
+            controller.report()
         grid = create_grid()
         spangram_path = place_spangram(
             grid,
@@ -744,6 +1162,8 @@ def build_unique_puzzle(spangram, theme_words, spangram_attempts=300, controller
             theme_words=theme_words,
             max_attempts=1,
             controller=controller,
+            spangram_mode=spangram_mode,
+            long_threshold=long_threshold,
         )
         if spangram_path is None:
             continue
@@ -761,11 +1181,19 @@ def build_unique_puzzle(spangram, theme_words, spangram_attempts=300, controller
     return None, None
 
 
-def build_fast_puzzle(spangram, theme_words, spangram_attempts=120, controller=None):
+def build_fast_puzzle(
+    spangram,
+    theme_words,
+    spangram_attempts=120,
+    controller=None,
+    spangram_mode="auto",
+    long_threshold=11,
+):
     for _ in range(spangram_attempts):
         if controller is not None:
             controller.check()
             controller.bump("spangram_attempts")
+            controller.report()
         grid = create_grid()
         spangram_path = place_spangram(
             grid,
@@ -773,6 +1201,8 @@ def build_fast_puzzle(spangram, theme_words, spangram_attempts=120, controller=N
             theme_words=theme_words,
             max_attempts=1,
             controller=controller,
+            spangram_mode=spangram_mode,
+            long_threshold=long_threshold,
         )
         if spangram_path is None:
             continue
@@ -791,13 +1221,34 @@ def build_fast_puzzle(spangram, theme_words, spangram_attempts=120, controller=N
 
 
 if __name__ == "__main__":
-    spangram = "BUBBLEBATH"
-    theme_words = ["SHAMPOO", "SPONGE", "LOOFAH", "TOWEL", "SCENTED", "CANDLES"]
+    # spangram = "ELECTRICITY"
+    # theme_words = ["CIRCUIT", "WATTAGE", "BATTERY", "GENERATOR", "VOLTAGE"]
+    # spangram = "PROCRASTINATE"
+    # theme_words = ["DELAY", "DITHER", "STALL", "PAUSE", "LOITER", "HESITATE"]
+    # spangram = "AUTOMOBILE"
+    # theme_words = ["ENGINE", "PISTON", "CLUTCH", "CHASSIS", "GASKET", "EXHAUST"]
+    # spangram = "YOGAPOSES"
+    # theme_words = ["COBRA", "PLANK", "WARRIOR", "BRIDGE", "MOUNTAIN", "TRIANGLE"]
+    # spangram = "THEATRICAL"
+    # theme_words = ["DIALOGUE", "COSTUME", "PROPS", "SPOTLIGHT", "REHEARSAL"]
+    # spangram = "MOUNTAINEER"
+    # theme_words = ["SUMMIT", "CREVASSE", "GLACIER", "SHELTER", "CARABINER"]
+    # spangram = "FURNITURE"
+    # theme_words = ["OTTOMAN", "RECLINER", "ARMOIRE", "SIDEBOARD", "CREDENZA"]
+    # spangram = "CONSTRUCTION"
+    # theme_words = ["SCAFFOLD", "GIRDER", "CEMENT", "DERRICK", "BULLDOZER"]
+    # spangram = "POKERHAND"
+    # theme_words = ["FLUSH", "FULLHOUSE", "ROYAL", "PAIR", "QUADS", "TRIPS", "DEALER"]
+
+    spangram = "NOCTURNAL"
+    theme_words = ["BADGER", "RACCOON", "FIREFLY", "CRICKET", "OPOSSUM", "LEMUR"]
 
     max_seconds = int(os.getenv("STRANDS_MAX_SECONDS", "1200"))
     spangram_attempts = int(os.getenv("STRANDS_SPANGRAM_ATTEMPTS", "250"))
     progress_every = float(os.getenv("STRANDS_PROGRESS_EVERY", "10"))
     mode = os.getenv("STRANDS_MODE", "fast").strip().lower()
+    spangram_mode = os.getenv("STRANDS_SPANGRAM_MODE", "auto").strip().lower()
+    long_threshold = int(os.getenv("STRANDS_LONG_SPANGRAM_THRESHOLD", "11"))
 
     controller = SearchController(
         max_seconds=max_seconds,
@@ -811,6 +1262,8 @@ if __name__ == "__main__":
                 theme_words,
                 spangram_attempts=spangram_attempts,
                 controller=controller,
+                spangram_mode=spangram_mode,
+                long_threshold=long_threshold,
             )
         else:
             grid, assignment = build_fast_puzzle(
@@ -818,6 +1271,8 @@ if __name__ == "__main__":
                 theme_words,
                 spangram_attempts=min(spangram_attempts, 160),
                 controller=controller,
+                spangram_mode=spangram_mode,
+                long_threshold=long_threshold,
             )
     except SearchTimeout:
         grid, assignment = None, None
@@ -833,3 +1288,4 @@ if __name__ == "__main__":
         print_grid(grid)
 
     controller.report(force=True, context="final")
+

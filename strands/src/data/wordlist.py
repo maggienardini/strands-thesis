@@ -2,8 +2,8 @@ import json
 import string
 from datetime import datetime
 
-INPUT_FILE = "llm_long_lists.json"
-OUTPUT_FILE = "llm_valid_lists.json"
+INPUT_FILE = "v2_gemini_llm_long_lists.json"
+OUTPUT_FILE = "v2_llm_valid_lists.json"
 
 # subset sum problem 
 def subset_sum_words(puzzle):

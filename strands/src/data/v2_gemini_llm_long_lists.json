@@ -1,0 +1,92 @@
+[
+  {
+    "theme": "Current events",
+    "spangram": "ELECTRICITY",
+    "theme_words": [
+      "VOLTAGE", "CIRCUIT", "WATTAGE", "AMPERE", "BATTERY", 
+      "TURBINE", "GENERATOR", "SOCKET", "CONDUIT", "CHARGE", 
+      "ELECTRON", "CAPACITOR", "TRANSFORMER", "LIGHTNING", "INDUCTOR"
+    ]
+  },
+  {
+    "theme": "Wait for it...",
+    "spangram": "PROCRASTINATE",
+    "theme_words": [
+      "DELAY", "DITHER", "STALL", "PAUSE", "LOITER", 
+      "HESITATE", "LINGER", "ADJOURN", "SUSPEND", "DEFER", 
+      "POSTPONE", "TARRY", "DAWDLE", "IDLE", "SHIRK"
+    ]
+  },
+  {
+    "theme": "Under the hood",
+    "spangram": "AUTOMOBILE",
+    "theme_words": [
+      "ENGINE", "PISTON", "RADIATOR", "CLUTCH", "CHASSIS", 
+      "GASKET", "EXHAUST", "MUFFLER", "FLYWHEEL", "ALTERNATOR", 
+      "CYLINDER", "GEARBOX", "CARBURETOR", "CAMSHAFT", "SUSPENSION"
+    ]
+  },
+  {
+    "theme": "A bit of a stretch",
+    "spangram": "YOGAPOSES",
+    "theme_words": [
+      "COBRA", "PLANK", "WARRIOR", "BRIDGE", "LOTUS", 
+      "MOUNTAIN", "TRIANGLE", "CHAIR", "LOCUST", "SPHINX", 
+      "PIGEON", "CROW", "TREE", "GARLAND", "PLOW"
+    ]
+  },
+  {
+    "theme": "Make a scene",
+    "spangram": "THEATRICAL",
+    "theme_words": [
+      "DIALOGUE", "COSTUME", "PROPS", "BACKDROP", "CURTAIN", 
+      "SPOTLIGHT", "REHEARSAL", "MONOLOGUE", "AUDITION", "DIRECTOR", 
+      "PLAYWRIGHT", "SOLILOQUY", "ENCORE", "OVATION", "INTERMISSION"
+    ]
+  },
+  {
+    "theme": "High-altitude",
+    "spangram": "MOUNTAINEER",
+    "theme_words": [
+      "SUMMIT", "ASCENT", "CREVASSE", "GLACIER", "SHELTER", 
+      "HARNESS", "CARABINER", "CRAMPON", "PITON", "RAPPEL", 
+      "BASECAMP", "ALPINE", "PLATEAU", "CLIFF", "RIDGE"
+    ]
+  },
+  {
+    "theme": "I'm staying put",
+    "spangram": "FURNITURE",
+    "theme_words": [
+      "OTTOMAN", "RECLINER", "BUREAU", "SETTEE", "ARMOIRE", 
+      "SIDEBOARD", "CREDENZA", "BOOKSHELF", "DRESSER", "CABINET", 
+      "NIGHTSTAND", "LOVESEAT", "CHAISE", "FOOTSTOOL", "WARDROBE"
+    ]
+  },
+  {
+    "theme": "Heavy metal",
+    "spangram": "CONSTRUCTION",
+    "theme_words": [
+      "SCAFFOLD", "GIRDER", "CEMENT", "CRANE", "DERRICK", 
+      "BACKHOE", "BULLDOZER", "FORKLIFT", "EXCAVATOR", "GRADER", 
+      "PAVER", "TRENCH", "FOUNDATION", "RIVET", "I-BEAM"
+    ]
+  },
+  {
+    "theme": "Wild card",
+    "spangram": "POKERHAND",
+    "theme_words": [
+      "STRAIGHT", "FLUSH", "FULLHOUSE", "ROYAL", "PAIR", 
+      "QUADS", "TRIPS", "BLUFF", "ANTE", "DEALER", 
+      "CHIPS", "STAKES", "LIMIT", "FOLD", "RAISE"
+    ]
+  },
+  {
+    "theme": "Night owls",
+    "spangram": "NOCTURNAL",
+    "theme_words": [
+      "BADGER", "RACCOON", "FIREFLY", "CRICKET", "COYOTE", 
+      "OPOSSUM", "HEDGEHOG", "HAMSTER", "LEMUR", "GALAGO", 
+      "SHREW", "MOTH", "PANTHER", "HYENA", "JERBOA"
+    ]
+  }
+]
