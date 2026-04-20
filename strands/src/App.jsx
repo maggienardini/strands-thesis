@@ -1,18 +1,22 @@
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import Grid from "./components/Grid";
-import { puzzle } from "./data/potential_grid";
+import { puzzle } from "./data/v2_gemini_potential_grid";
 import "./App.css";
 
 function App() {
   const [selectedCells, setSelectedCells] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
   const gridRef = useRef(null);
+  const selectedCellsRef = useRef([]);
+  const isSubmittingRef = useRef(false);
 
   const [foundWords, setFoundWords] = useState([]);
   const [lastResult, setLastResult] = useState(null);
   const [foundPositions, setFoundPositions] = useState(new Set());
   const [foundPaths, setFoundPaths] = useState([]);
   const [hintsCount, setHintsCount] = useState(0);
+  const [activeHint, setActiveHint] = useState(null); // { word, stage: 'highlight' | 'bounce' }
+  const [hintedWords, setHintedWords] = useState([]);
 
   // puzzle data structures
   const puzzleGrid = puzzle.grid;
@@ -34,6 +38,19 @@ function App() {
   const puzzleTypeMap = new Map(puzzle.words.map(w => [w.word.toUpperCase(), w.type]));
   const MIN_LENGTH = 4;
   const dictionaryCache = useRef(new Map());
+  const usedNonThemeWords = useRef(new Set());
+
+  useEffect(() => {
+    selectedCellsRef.current = selectedCells;
+  }, [selectedCells]);
+
+  const setSelectedCellsSync = (updater) => {
+    setSelectedCells(prev => {
+      const next = typeof updater === "function" ? updater(prev) : updater;
+      selectedCellsRef.current = next;
+      return next;
+    });
+  };
 
   //this function doesn't work! or the coordinates are working weird
 
@@ -58,6 +75,10 @@ function App() {
     }
 
     if (foundWords.includes(up)) {
+      return { status: "alreadyFound", word: up };
+    }
+
+    if (usedNonThemeWords.current.has(up)) {
       return { status: "alreadyFound", word: up };
     }
 
@@ -130,10 +151,83 @@ function App() {
     return null;
   }
 
-  const handleMouseDown = (row, col) => {
-    setIsDragging(true);
-    setSelectedCells([{ row, col }]);
+  const submitSelectedWord = async (cells = selectedCellsRef.current) => {
+    if (cells.length < 2) return;
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+
+    const word = cells.map(({ row, col }) => (gridRows?.[row]?.[col] || "")).join("");
+    try {
+      const result = await validateWord(word);
+      setLastResult(result);
+      if (result.status === "foundInPuzzle") {
+        setFoundWords(prev => prev.includes(result.word) ? prev : [...prev, result.word]);
+        const path = findPathForWord(result.word);
+        if (path) {
+          setFoundPositions(prev => {
+            const next = new Set(prev);
+            path.forEach(({ row, col }) => next.add(`${row}-${col}`));
+            return next;
+          });
+          setFoundPaths(prev => (
+            prev.some(p => p.word === result.word) ? prev : [...prev, { word: result.word, path, type: result.type }]
+          ));
+        }
+        if (activeHint && activeHint.word === result.word) {
+          setActiveHint(null);
+        }
+        setSelectedCellsSync([]);
+      } else if (result.status === "validNotInPuzzle") {
+        usedNonThemeWords.current.add(result.word);
+        setHintsCount(prev => prev + 1);
+        setSelectedCellsSync([]);
+      } else {
+        setSelectedCellsSync([]);
+      }
+      console.log("Validation result:", result);
+    } finally {
+      isSubmittingRef.current = false;
+    }
+  };
+
+  const handleMouseDown = (row, col, e) => {
+    e.preventDefault();
+
+    // Single click: extend path if adjacent, backtrack, or start new path.
+    // Clicking the current endpoint submits, with no timing dependency.
     setLastResult(null);
+
+    const cells = selectedCellsRef.current;
+
+    if (cells.length > 0) {
+      const lastCell = cells[cells.length - 1];
+
+      if (lastCell.row === row && lastCell.col === col) {
+        if (cells.length > 1) {
+          void submitSelectedWord(cells);
+        } else {
+          setSelectedCellsSync([]);
+        }
+        return;
+      }
+
+      // Check if clicking a cell already in the path (backtrack)
+      const existingIndex = cells.findIndex(c => c.row === row && c.col === col);
+      if (existingIndex !== -1) {
+        setSelectedCellsSync(prev => prev.slice(0, existingIndex + 1));
+        return;
+      }
+
+      // Check if adjacent to last cell (extend path)
+      if (isAdjacent(lastCell.row, lastCell.col, row, col)) {
+        setSelectedCellsSync(prev => [...prev, { row, col }]);
+        return;
+      }
+    }
+
+    // Non-adjacent cell or no prior selection: start new path (also enables drag)
+    setIsDragging(true);
+    setSelectedCellsSync([{ row, col }]);
   };
 
   const handleGridMouseMove = (e) => {
@@ -151,7 +245,13 @@ function App() {
 
     if (isNaN(row) || isNaN(col)) return;
 
-    setSelectedCells(prev => {
+    setSelectedCellsSync(prev => {
+      // Defensive guard: selection can be cleared by another interaction while
+      // drag events are still in flight; restart path from current cell.
+      if (!prev.length) {
+        return [{ row, col }];
+      }
+
       const existingIndex = prev.findIndex(
         cell => cell.row === row && cell.col === col
       );
@@ -163,9 +263,6 @@ function App() {
 
       // If adjacent to last cell, add it
       const last = prev[prev.length - 1];
-      // Check if cell is validly adjacent to last cell
-      console.log(isAdjacent(last.row, last.col, row, col));
-      console.log(`Last cell: (${last.row}, ${last.col}), New cell: (${row}, ${col})`);
       if (isAdjacent(last.row, last.col, row, col)) {
         return [...prev, { row, col }];
       }
@@ -175,10 +272,19 @@ function App() {
   };
 
   const handleMouseUp = () => {
+    // Only validate on mouseUp if we were actually dragging
+    // (not for single-click mode, which validates on double-click)
+    if (!isDragging) {
+      setIsDragging(false);
+      return;
+    }
+    
     setIsDragging(false);
-    if (selectedCells.length === 0 || selectedCells.length === 1) return;
+    const cells = selectedCellsRef.current;
+    if (cells.length < 3) return;
+    
     // build word from selected cells using rows-first grid
-    const word = selectedCells.map(({ row, col }) => (gridRows?.[row]?.[col] || "")).join("");
+    const word = cells.map(({ row, col }) => (gridRows?.[row]?.[col] || "")).join("");
 
     (async () => {
       const result = await validateWord(word);
@@ -197,14 +303,19 @@ function App() {
             prev.some(p => p.word === result.word) ? prev : [...prev, { word: result.word, path, type: result.type }]
           ));
         }
-        setSelectedCells([]);
+        // Clear hint if this was the hinted word
+        if (activeHint && activeHint.word === result.word) {
+          setActiveHint(null);
+        }
+        setSelectedCellsSync([]);
       } else if (result.status === "validNotInPuzzle") {
         // valid word but not in this puzzle
+        usedNonThemeWords.current.add(result.word);
         setHintsCount(prev => prev + 1);
-        setSelectedCells([]);
+        setSelectedCellsSync([]);
       } else {
         // too short or not a word
-        setSelectedCells([]);
+        setSelectedCellsSync([]);
       }
       console.log("Validation result:", result);
     })();
@@ -216,7 +327,7 @@ function App() {
 
   const getResultMessage = () => {
     if (!lastResult) return null;
-    const { status, word, type } = lastResult;
+    const { status, word } = lastResult;
     
     const messages = {
       foundInPuzzle: `${word}`,
@@ -229,14 +340,65 @@ function App() {
     return messages[status] || status;
   };
 
+  const getNextUnhintedWord = () => {
+    // Get all theme words (not spangram)
+    const themeWords = puzzle.words
+      .filter(w => {
+        const upper = w.word.toUpperCase();
+        return w.type === 'theme' && !foundWords.includes(upper) && !hintedWords.includes(upper);
+      })
+      .map(w => w.word.toUpperCase());
+    
+    // Get spangram if not found
+    const spangram = puzzle.words.find(w => w.type === 'spangram');
+    const spangramUpper = spangram ? spangram.word.toUpperCase() : null;
+    const spangramWord = spangramUpper && !foundWords.includes(spangramUpper) && !hintedWords.includes(spangramUpper)
+      ? spangramUpper
+      : null;
+    
+    // Return first unhinted theme word, or spangram if all themes found
+    return themeWords[0] || spangramWord;
+  };
+
+  const handleHintClick = () => {
+    if (hintsCount < 3) return; // Not enough hints
+
+    // If there's an active hint in bounce stage, user must find the word first
+    if (activeHint && activeHint.stage === 'bounce') return;
+
+    // If there's an active highlight hint, upgrade to bounce
+    if (activeHint && activeHint.stage === 'highlight') {
+      setActiveHint({ ...activeHint, stage: 'bounce' });
+      setHintsCount(prev => Math.max(0, prev - 3)); // Cost 3 hints to upgrade to bounce
+      return;
+    }
+
+    // No active hint: start a new hint
+    const nextWord = getNextUnhintedWord();
+    if (!nextWord) return; // No words left to hint
+
+    setActiveHint({ word: nextWord, stage: 'highlight' });
+    setHintedWords(prev => (prev.includes(nextWord) ? prev : [...prev, nextWord]));
+    setHintsCount(prev => Math.max(0, prev - 3)); // Cost 3 hints
+  };
+
   const displayWord = getDisplayWord();
   const shouldShowResult = !displayWord && lastResult;
+
+  // Calculate hint path for visualization
+  const hintPath = activeHint ? findPathForWord(activeHint.word) : null;
 
   return (
     <div className="app" onMouseUp={handleMouseUp}>
       <div className="header-row">
         <h1>Strands</h1>
-        <button className="hint-button">Hints: {hintsCount}/3</button>
+        <button 
+          className="hint-button" 
+          onClick={handleHintClick}
+          disabled={hintsCount < 3 || (activeHint && activeHint.stage === 'bounce')}
+        >
+          Hints: {hintsCount}/3{activeHint && '*'}
+        </button>
       </div>
       <h3>Today's theme: {puzzle.theme}</h3>
       <div className="word-display-area">
@@ -255,6 +417,8 @@ function App() {
         selectedCells={selectedCells}
         foundPositions={foundPositions}
         foundPaths={foundPaths}
+        hintPath={hintPath}
+        activeHint={activeHint}
         onMouseDown={handleMouseDown}
         onMouseMove={handleGridMouseMove}
       />
